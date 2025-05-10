@@ -629,6 +629,14 @@ resource "null_resource" "reboot_vsocket_secondary" {
   ]
 }
 
+# Time delay to allow for vsockets HA to complete configuration
+resource "null_resource" "delay-ha" {
+  depends_on = [null_resource.reboot_vsocket_secondary]
+  provisioner "local-exec" {
+    command = "sleep 75"
+  }
+}
+
 # Cato license resource
 resource "cato_license" "license" {
   depends_on = [null_resource.reboot_vsocket_secondary]
