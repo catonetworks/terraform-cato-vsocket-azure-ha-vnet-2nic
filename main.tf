@@ -92,10 +92,10 @@ resource "azurerm_network_interface" "wan-nic-primary" {
 }
 
 resource "azurerm_network_interface" "lan-nic-primary" {
-  ip_forwarding_enabled = true
-  location              = var.location
-  name                  = "${var.site_name}-lanPrimary"
-  resource_group_name   = azurerm_resource_group.azure-rg.name
+  ip_forwarding_enabled          = true
+  location                       = var.location
+  name                           = "${var.site_name}-lanPrimary"
+  resource_group_name            = azurerm_resource_group.azure-rg.name
   accelerated_networking_enabled = true
   ip_configuration {
     name                          = replace(replace("${var.site_name}-lanIPConfigPrimary", "-", "_"), " ", "_")
@@ -109,10 +109,10 @@ resource "azurerm_network_interface" "lan-nic-primary" {
 }
 
 resource "azurerm_network_interface" "wan-nic-secondary" {
-  ip_forwarding_enabled = true
-  location              = var.location
-  name                  = "${var.site_name}-wanSecondary"
-  resource_group_name   = azurerm_resource_group.azure-rg.name
+  ip_forwarding_enabled          = true
+  location                       = var.location
+  name                           = "${var.site_name}-wanSecondary"
+  resource_group_name            = azurerm_resource_group.azure-rg.name
   accelerated_networking_enabled = true
   ip_configuration {
     name                          = replace(replace("${var.site_name}-wanIPSecondary", "-", "_"), " ", "_")
@@ -127,10 +127,10 @@ resource "azurerm_network_interface" "wan-nic-secondary" {
 }
 
 resource "azurerm_network_interface" "lan-nic-secondary" {
-  ip_forwarding_enabled = true
-  location              = var.location
-  name                  = "${var.site_name}-lanSecondary"
-  resource_group_name   = azurerm_resource_group.azure-rg.name
+  ip_forwarding_enabled          = true
+  location                       = var.location
+  name                           = "${var.site_name}-lanSecondary"
+  resource_group_name            = azurerm_resource_group.azure-rg.name
   accelerated_networking_enabled = true
   ip_configuration {
     name                          = replace(replace("${var.site_name}-lanIPConfigSecondary", "-", "_"), " ", "_")
@@ -327,19 +327,19 @@ resource "null_resource" "sleep_5_seconds" {
   provisioner "local-exec" {
     command = "sleep 5"
   }
-  depends_on = [ azurerm_virtual_machine.vsocket_primary ]
+  depends_on = [azurerm_virtual_machine.vsocket_primary]
 }
 
 data "azurerm_network_interface" "wannicmac" {
   name                = "${var.site_name}-wanPrimary"
   resource_group_name = azurerm_resource_group.azure-rg.name
-  depends_on = [ null_resource.sleep_5_seconds ]
+  depends_on          = [null_resource.sleep_5_seconds]
 }
 
 data "azurerm_network_interface" "lannicmac" {
   name                = "${var.site_name}-lanPrimary"
   resource_group_name = azurerm_resource_group.azure-rg.name
-  depends_on = [ null_resource.sleep_5_seconds ]
+  depends_on          = [null_resource.sleep_5_seconds]
 }
 
 variable "commands" {
@@ -361,7 +361,7 @@ resource "azurerm_virtual_machine_extension" "vsocket-custom-script-primary" {
   lifecycle {
     ignore_changes = all
   }
-settings = <<SETTINGS
+  settings = <<SETTINGS
 {
   "commandToExecute": "echo '${local.primary_serial[0]}' > /cato/serial.txt; echo '{\"wan_nic\":\"${azurerm_network_interface.wan-nic-primary.name}\",\"wan_nic_mac\":\"${lower(replace(data.azurerm_network_interface.wannicmac.mac_address, "-", ":"))}\",\"wan_nic_ip\":\"${azurerm_network_interface.wan-nic-primary.private_ip_address}\",\"lan_nic\":\"${azurerm_network_interface.lan-nic-primary.name}\",\"lan_nic_mac\":\"${lower(replace(data.azurerm_network_interface.lannicmac.mac_address, "-", ":"))}\",\"lan_nic_ip\":\"${azurerm_network_interface.lan-nic-primary.private_ip_address}\"}' > /cato/nics_config.json; ${join(";", var.commands)}"
 }
@@ -491,19 +491,19 @@ resource "null_resource" "sleep_5_seconds-2" {
   provisioner "local-exec" {
     command = "sleep 5"
   }
-  depends_on = [ azurerm_virtual_machine.vsocket_secondary ]
+  depends_on = [azurerm_virtual_machine.vsocket_secondary]
 }
 
 data "azurerm_network_interface" "wannicmac-2" {
   name                = "${var.site_name}-wanSecondary"
   resource_group_name = azurerm_resource_group.azure-rg.name
-  depends_on = [ null_resource.sleep_5_seconds-2 ]
+  depends_on          = [null_resource.sleep_5_seconds-2]
 }
 
 data "azurerm_network_interface" "lannicmac-2" {
   name                = "${var.site_name}-lanSecondary"
   resource_group_name = azurerm_resource_group.azure-rg.name
-  depends_on = [ null_resource.sleep_5_seconds-2 ]
+  depends_on          = [null_resource.sleep_5_seconds-2]
 }
 
 variable "commands-secondary" {

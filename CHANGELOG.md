@@ -8,4 +8,9 @@
 ### Features
 - Addition of delay timer to allow HA configuration to complete
 
+## 0.0.3 (2025-05-10)
+
+### Features
+- Updated README.md
+
 
