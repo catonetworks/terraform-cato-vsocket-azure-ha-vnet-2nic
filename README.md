@@ -24,7 +24,7 @@ provider "cato" {
   account_id = var.account_id
 }
 
-module "vsocket-azure-ha-vnet" {
+module "vsocket-azure-ha-vnet-2nic" {
   source                  = "catonetworks/vsocket-azure-ha-vnet-2nic/cato"
   token                   = "xxxxxxx"
   account_id              = "xxxxxxx"
