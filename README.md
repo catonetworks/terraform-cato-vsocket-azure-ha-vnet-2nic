@@ -25,25 +25,32 @@ provider "cato" {
 }
 
 module "vsocket-azure-ha-vnet-2nic" {
-  source                  = "catonetworks/vsocket-azure-ha-vnet-2nic/cato"
-  token                   = "xxxxxxx"
-  account_id              = "xxxxxxx"
-  azure_subscription_id   = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
-  location                = "East US"
-  vnet_prefix             = "10.3.0.0/16"
-  subnet_range_mgmt       = "10.3.1.0/24"
-  subnet_range_wan        = "10.3.2.0/24"
-  subnet_range_lan        = "10.3.3.0/24"
-  lan_ip_primary          = "10.3.3.4"
-  lan_ip_secondary        = "10.3.3.5"
-  floating_ip             = "10.3.3.6"
-  site_name               = "Your-Cato-site-name-here"
-  site_description        = "Your Cato site desc here"
-  site_location           = {
-    city         = "San Diego"
-    country_code = "US"
-    state_code   = "US-CA" ## Optional - for countries with states
-    timezone     = "America/Los_Angeles"
+  source                = "catonetworks/terraform-cato-vsocket-azure-ha-vnet-2nic"
+  token                 = "xxxxxxx"
+  account_id            = "xxxxxxx"
+  azure_subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
+  location              = "West Europe"
+  vnet_name             = "Your VNET Name"
+  vnet_id               = null #add vnet id if already created, example "/subscriptions/abcd1234-12ab-1234-5678-1234abcd/resourceGroups/Your_resource_group_name/providers/Microsoft.Network/virtualNetworks/Azure_customVNET"
+  resource_group_name   = "Your Resource Group Name"
+  create_resource_group = true # Set to false if you want to deploy to existing Resource Group
+  vnet_prefix           = "10.113.0.0/16"
+  subnet_range_wan      = "10.113.2.0/24"
+  subnet_range_lan      = "10.113.3.128/25"
+  lan_ip_primary        = "10.113.3.135"
+  lan_ip_secondary      = "10.113.3.136"
+  floating_ip           = "10.113.3.137"
+  routed_ranges         = ["10.100.0.0/24", "10.100.1.0/24"] # Add routed ranges for Cato site
+  routed_ranges_names   = ["VOIP subnet 100", "DC_Server subnet 100.1"] # Add routed ranges names for Cato site
+  upstream_bandwidth    = 1000
+  downstream_bandwidth  = 1000
+  site_name             = "Your Site name here"
+  site_description      = "Your description here"
+  site_location = {
+    city         = "Beek"
+    country_code = "NL"
+    state_code   = null
+    timezone     = "Europe/Amsterdam"
   }
 }
 ```
@@ -83,6 +90,7 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | n/a |
 | <a name="provider_cato"></a> [cato](#provider\_cato) | n/a |
 | <a name="provider_null"></a> [null](#provider\_null) | n/a |
+| <a name="provider_time"></a> [time](#provider\_time) | n/a |
 
 ## Modules
 
@@ -126,23 +134,27 @@ No modules.
 | [azurerm_virtual_network.vnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network) | resource |
 | [azurerm_virtual_network_dns_servers.dns_servers](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network_dns_servers) | resource |
 | [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
+| [cato_network_range.routedAzure](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/network_range) | resource |
 | [cato_socket_site.azure-site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
+| [cato_wan_interface.wan](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/wan_interface) | resource |
 | [null_resource.configure_secondary_azure_vsocket](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
-| [null_resource.delay](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
-| [null_resource.delay-ha](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.reboot_vsocket_primary](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.reboot_vsocket_secondary](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.run_command_ha_primary](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.run_command_ha_secondary](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
-| [null_resource.sleep_300_seconds](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
 | [null_resource.sleep_30_seconds](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
-| [null_resource.sleep_5_seconds](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
-| [null_resource.sleep_5_seconds-2](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [null_resource.sleep_before_delete](https://registry.terraform.io/providers/hashicorp/null/latest/docs/resources/resource) | resource |
+| [time_sleep.delay](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
+| [time_sleep.delay-ha](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
+| [time_sleep.sleep_300_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
+| [time_sleep.sleep_5_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
+| [time_sleep.sleep_5_seconds-2](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [azurerm_network_interface.lannicmac](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/network_interface) | data source |
 | [azurerm_network_interface.lannicmac-2](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/network_interface) | data source |
 | [azurerm_network_interface.wannicmac](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/network_interface) | data source |
 | [azurerm_network_interface.wannicmac-2](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/network_interface) | data source |
 | [cato_accountSnapshotSite.azure-site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_accountSnapshotSite.azure-site-2](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 | [cato_accountSnapshotSite.azure-site-secondary](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
 
 ## Inputs
@@ -154,8 +166,10 @@ No modules.
 | <a name="input_baseurl"></a> [baseurl](#input\_baseurl) | Base URL for the Cato Networks API. | `string` | `"https://api.catonetworks.com/api/v1/graphql2"` | no |
 | <a name="input_commands"></a> [commands](#input\_commands) | n/a | `list(string)` | <pre>[<br/>  "rm /cato/deviceid.txt",<br/>  "rm /cato/socket/configuration/socket_registration.json",<br/>  "nohup /cato/socket/run_socket_daemon.sh &"<br/>]</pre> | no |
 | <a name="input_commands-secondary"></a> [commands-secondary](#input\_commands-secondary) | n/a | `list(string)` | <pre>[<br/>  "rm /cato/deviceid.txt",<br/>  "rm /cato/socket/configuration/socket_registration.json",<br/>  "nohup /cato/socket/run_socket_daemon.sh &"<br/>]</pre> | no |
+| <a name="input_create_resource_group"></a> [create\_resource\_group](#input\_create\_resource\_group) | Resource group creation true will create and false will use exsiting | `bool` | n/a | yes |
 | <a name="input_disk_size_gb"></a> [disk\_size\_gb](#input\_disk\_size\_gb) | Size of the managed disk in GB. | `number` | `8` | no |
 | <a name="input_dns_servers"></a> [dns\_servers](#input\_dns\_servers) | n/a | `list(string)` | <pre>[<br/>  "168.63.129.16",<br/>  "10.254.254.1",<br/>  "1.1.1.1",<br/>  "8.8.8.8"<br/>]</pre> | no |
+| <a name="input_downstream_bandwidth"></a> [downstream\_bandwidth](#input\_downstream\_bandwidth) | Sockets downstream interface WAN Bandwidth in Mbps | `string` | `"null"` | no |
 | <a name="input_floating_ip"></a> [floating\_ip](#input\_floating\_ip) | Floating IP Address for the vSocket | `string` | `null` | no |
 | <a name="input_image_reference_id"></a> [image\_reference\_id](#input\_image\_reference\_id) | The path to the image used to deploy a specific version of the virtual socket. | `string` | `"/Subscriptions/38b5ec1d-b3b6-4f50-a34e-f04a67121955/Providers/Microsoft.Compute/Locations/eastus/Publishers/catonetworks/ArtifactTypes/VMImage/Offers/cato_socket/Skus/public-cato-socket/Versions/21.0.18517"` | no |
 | <a name="input_lan_ip_primary"></a> [lan\_ip\_primary](#input\_lan\_ip\_primary) | Local IP Address of socket LAN interface | `string` | `null` | no |
@@ -163,6 +177,9 @@ No modules.
 | <a name="input_license_bw"></a> [license\_bw](#input\_license\_bw) | The license bandwidth number for the cato site, specifying bandwidth ONLY applies for pooled licenses.  For a standard site license that is not pooled, leave this value null. Must be a number greater than 0 and an increment of 10. | `string` | `null` | no |
 | <a name="input_license_id"></a> [license\_id](#input\_license\_id) | The license ID for the Cato vSocket of license type CATO\_SITE, CATO\_SSE\_SITE, CATO\_PB, CATO\_PB\_SSE.  Example License ID value: 'abcde123-abcd-1234-abcd-abcde1234567'.  Note that licenses are for commercial accounts, and not supported for trial accounts. | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `null` | no |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Resource group name required if you want to deploy into existing Resource group | `string` | n/a | yes |
+| <a name="input_routed_ranges"></a> [routed\_ranges](#input\_routed\_ranges) | Routed ranges to be accessed behind the vSocket site | `list(string)` | `null` | no |
+| <a name="input_routed_ranges_names"></a> [routed\_ranges\_names](#input\_routed\_ranges\_names) | Routed ranges names | `list(string)` | `null` | no |
 | <a name="input_site_description"></a> [site\_description](#input\_site\_description) | Description of the vsocket site | `string` | n/a | yes |
 | <a name="input_site_location"></a> [site\_location](#input\_site\_location) | n/a | <pre>object({<br/>    city         = string<br/>    country_code = string<br/>    state_code   = string<br/>    timezone     = string<br/>  })</pre> | n/a | yes |
 | <a name="input_site_name"></a> [site\_name](#input\_site\_name) | Name of the vsocket site | `string` | n/a | yes |
@@ -170,7 +187,10 @@ No modules.
 | <a name="input_subnet_range_lan"></a> [subnet\_range\_lan](#input\_subnet\_range\_lan) | Choose a range within the VPC to use as the Private/LAN subnet. This subnet will host the target LAN interface of the vSocket so resources in the VPC (or AWS Region) can route to the Cato Cloud.<br/>    The minimum subnet length to support High Availability is /29.<br/>    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X | `string` | `null` | no |
 | <a name="input_subnet_range_wan"></a> [subnet\_range\_wan](#input\_subnet\_range\_wan) | Choose a range within the VPC to use as the Public/WAN subnet. This subnet will be used to access the public internet and securely tunnel to the Cato Cloud.<br/>    The minimum subnet length to support High Availability is /28.<br/>    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X | `string` | `null` | no |
 | <a name="input_token"></a> [token](#input\_token) | API token used to authenticate with the Cato Networks API. | `any` | n/a | yes |
+| <a name="input_upstream_bandwidth"></a> [upstream\_bandwidth](#input\_upstream\_bandwidth) | Sockets upstream interface WAN Bandwidth in Mbps | `string` | `"null"` | no |
 | <a name="input_vm_size"></a> [vm\_size](#input\_vm\_size) | (Required) Specifies the size of the Virtual Machine. See Azure VM Naming Conventions: https://learn.microsoft.com/en-us/azure/virtual-machines/vm-naming-conventions | `string` | `"Standard_D2s_v5"` | no |
+| <a name="input_vnet_id"></a> [vnet\_id](#input\_vnet\_id) | VNET ID required if you want to deploy into existing VNET | `string` | `null` | no |
+| <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | VNET Name required if you want to deploy into existing VNET | `string` | n/a | yes |
 | <a name="input_vnet_prefix"></a> [vnet\_prefix](#input\_vnet\_prefix) | Choose a unique range for your new VPC that does not conflict with the rest of your Wide Area Network.<br/>    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X | `string` | `null` | no |
 
 ## Outputs
@@ -198,11 +218,9 @@ No modules.
 | <a name="output_primary_disk_id"></a> [primary\_disk\_id](#output\_primary\_disk\_id) | ID of the Primary vSocket Managed Disk |
 | <a name="output_primary_disk_name"></a> [primary\_disk\_name](#output\_primary\_disk\_name) | Name of the Primary vSocket Managed Disk |
 | <a name="output_primary_nic_role_assignment_id"></a> [primary\_nic\_role\_assignment\_id](#output\_primary\_nic\_role\_assignment\_id) | Role Assignment ID for the Primary NIC |
-| <a name="output_resource_group_name"></a> [resource\_group\_name](#output\_resource\_group\_name) | The name of the Azure Resource Group used for deployment. |
 | <a name="output_secondary_disk_id"></a> [secondary\_disk\_id](#output\_secondary\_disk\_id) | ID of the Secondary vSocket Managed Disk |
 | <a name="output_secondary_disk_name"></a> [secondary\_disk\_name](#output\_secondary\_disk\_name) | Name of the Secondary vSocket Managed Disk |
 | <a name="output_secondary_nic_role_assignment_id"></a> [secondary\_nic\_role\_assignment\_id](#output\_secondary\_nic\_role\_assignment\_id) | Role Assignment ID for the Secondary NIC |
-| <a name="output_vnet_name"></a> [vnet\_name](#output\_vnet\_name) | The name of the Azure Virtual Network used by the deployment. |
 | <a name="output_vsocket_primary_reboot_status"></a> [vsocket\_primary\_reboot\_status](#output\_vsocket\_primary\_reboot\_status) | Status of the Primary vSocket VM Reboot |
 | <a name="output_vsocket_primary_vm_id"></a> [vsocket\_primary\_vm\_id](#output\_vsocket\_primary\_vm\_id) | ID of the Primary vSocket Virtual Machine |
 | <a name="output_vsocket_primary_vm_name"></a> [vsocket\_primary\_vm\_name](#output\_vsocket\_primary\_vm\_name) | Name of the Primary vSocket Virtual Machine |
@@ -212,7 +230,7 @@ No modules.
 | <a name="output_wan_nic_name_primary"></a> [wan\_nic\_name\_primary](#output\_wan\_nic\_name\_primary) | The name of the primary WAN network interface. |
 | <a name="output_wan_nic_name_secondary"></a> [wan\_nic\_name\_secondary](#output\_wan\_nic\_name\_secondary) | The name of the secondary WAN network interface for HA. |
 | <a name="output_wan_primary_nic_id"></a> [wan\_primary\_nic\_id](#output\_wan\_primary\_nic\_id) | ID of the WAN Primary Network Interface |
-| <a name="output_wan_primary_nic_mac_address"></a> [wan\_primary\_nic\_mac\_address](#output\_wan\_primary\_nic\_mac\_address) | MAC of the LAN Primary Network Interface |
+| <a name="output_wan_primary_nic_mac_address"></a> [wan\_primary\_nic\_mac\_address](#output\_wan\_primary\_nic\_mac\_address) | MAC of the WAN Primary Network Interface |
 | <a name="output_wan_secondary_nic_id"></a> [wan\_secondary\_nic\_id](#output\_wan\_secondary\_nic\_id) | ID of the WAN Secondary Network Interface |
-| <a name="output_wan_secondary_nic_mac_address"></a> [wan\_secondary\_nic\_mac\_address](#output\_wan\_secondary\_nic\_mac\_address) | MAC of the LAN Secondary Network Interface |
+| <a name="output_wan_secondary_nic_mac_address"></a> [wan\_secondary\_nic\_mac\_address](#output\_wan\_secondary\_nic\_mac\_address) | MAC of the WAN Secondary Network Interface |
 <!-- END_TF_DOCS -->

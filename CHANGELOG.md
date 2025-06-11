@@ -13,4 +13,12 @@
 ### Features
 - Updated README.md
 
+## 0.0.4 (2025-06-11)
 
+### Features
+- Updated README.md
+- Added optional variable to configure sockets Bandwidth
+- Added optional variable to configure sockets Routed Networks and Names
+- Added optional variable for use of existing Resource Group
+- Added optional variable for use of existing VNET
+- Fixed error on Cato site deletion

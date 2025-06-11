@@ -1,7 +1,8 @@
 ## VNET Module Resources
 resource "azurerm_resource_group" "azure-rg" {
+  count    = var.create_resource_group == true ? 1 : 0
   location = var.location
-  name     = replace(replace(var.site_name, "-", ""), " ", "_")
+  name     = var.resource_group_name
 }
 
 resource "azurerm_availability_set" "availability-set" {
@@ -9,7 +10,7 @@ resource "azurerm_availability_set" "availability-set" {
   name                         = replace(replace("${var.site_name}-availabilitySet", "-", "_"), " ", "_")
   platform_fault_domain_count  = 2
   platform_update_domain_count = 2
-  resource_group_name          = azurerm_resource_group.azure-rg.name
+  resource_group_name          = var.resource_group_name
   depends_on = [
     azurerm_resource_group.azure-rg
   ]
@@ -17,25 +18,26 @@ resource "azurerm_availability_set" "availability-set" {
 
 ## Create Network and Subnets
 resource "azurerm_virtual_network" "vnet" {
+  count               = var.vnet_id == null ? 1 : 0
   address_space       = [var.vnet_prefix]
   location            = var.location
-  name                = replace(replace("${var.site_name}-vsNet", "-", "_"), " ", "_")
-  resource_group_name = azurerm_resource_group.azure-rg.name
+  name                = var.vnet_name
+  resource_group_name = var.resource_group_name
   depends_on = [
     azurerm_resource_group.azure-rg
   ]
 }
 
 resource "azurerm_virtual_network_dns_servers" "dns_servers" {
-  virtual_network_id = azurerm_virtual_network.vnet.id
+  virtual_network_id = var.vnet_id == null ? azurerm_virtual_network.vnet[0].id : var.vnet_id
   dns_servers        = var.dns_servers
 }
 
 resource "azurerm_subnet" "subnet-wan" {
   address_prefixes     = [var.subnet_range_wan]
   name                 = replace(replace("${var.site_name}-subnetWAN", "-", "_"), " ", "_")
-  resource_group_name  = azurerm_resource_group.azure-rg.name
-  virtual_network_name = replace(replace("${var.site_name}-vsNet", "-", "_"), " ", "_")
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = var.vnet_name
   depends_on = [
     azurerm_virtual_network.vnet
   ]
@@ -44,8 +46,8 @@ resource "azurerm_subnet" "subnet-wan" {
 resource "azurerm_subnet" "subnet-lan" {
   address_prefixes     = [var.subnet_range_lan]
   name                 = replace(replace("${var.site_name}-subnetLAN", "-", "_"), " ", "_")
-  resource_group_name  = azurerm_resource_group.azure-rg.name
-  virtual_network_name = replace(replace("${var.site_name}-vsNet", "-", "_"), " ", "_")
+  resource_group_name  = var.resource_group_name
+  virtual_network_name = var.vnet_name
   depends_on = [
     azurerm_virtual_network.vnet
   ]
@@ -55,7 +57,7 @@ resource "azurerm_public_ip" "wan-public-ip-primary" {
   allocation_method   = "Static"
   location            = var.location
   name                = replace(replace("${var.site_name}-wanPublicIPPrimary", "-", "_"), " ", "_")
-  resource_group_name = azurerm_resource_group.azure-rg.name
+  resource_group_name = var.resource_group_name
   sku                 = "Standard"
   depends_on = [
     azurerm_resource_group.azure-rg
@@ -66,7 +68,7 @@ resource "azurerm_public_ip" "wan-public-ip-secondary" {
   allocation_method   = "Static"
   location            = var.location
   name                = replace(replace("${var.site_name}-wanPublicIPSecondary", "-", "_"), " ", "_")
-  resource_group_name = azurerm_resource_group.azure-rg.name
+  resource_group_name = var.resource_group_name
   sku                 = "Standard"
   depends_on = [
     azurerm_resource_group.azure-rg
@@ -76,9 +78,10 @@ resource "azurerm_public_ip" "wan-public-ip-secondary" {
 # Create Network Interfaces
 resource "azurerm_network_interface" "wan-nic-primary" {
   ip_forwarding_enabled = true
+  accelerated_networking_enabled = true
   location              = var.location
   name                  = "${var.site_name}-wanPrimary"
-  resource_group_name   = azurerm_resource_group.azure-rg.name
+  resource_group_name   = var.resource_group_name
   ip_configuration {
     name                          = replace(replace("${var.site_name}-wanIPPrimary", "-", "_"), " ", "_")
     private_ip_address_allocation = "Dynamic"
@@ -91,12 +94,13 @@ resource "azurerm_network_interface" "wan-nic-primary" {
   ]
 }
 
+
 resource "azurerm_network_interface" "lan-nic-primary" {
-  ip_forwarding_enabled          = true
-  location                       = var.location
-  name                           = "${var.site_name}-lanPrimary"
-  resource_group_name            = azurerm_resource_group.azure-rg.name
+  ip_forwarding_enabled = true
   accelerated_networking_enabled = true
+  location              = var.location
+  name                  = "${var.site_name}-lanPrimary"
+  resource_group_name   = var.resource_group_name
   ip_configuration {
     name                          = replace(replace("${var.site_name}-lanIPConfigPrimary", "-", "_"), " ", "_")
     private_ip_address_allocation = "Static"
@@ -109,11 +113,11 @@ resource "azurerm_network_interface" "lan-nic-primary" {
 }
 
 resource "azurerm_network_interface" "wan-nic-secondary" {
-  ip_forwarding_enabled          = true
-  location                       = var.location
-  name                           = "${var.site_name}-wanSecondary"
-  resource_group_name            = azurerm_resource_group.azure-rg.name
+  ip_forwarding_enabled = true
   accelerated_networking_enabled = true
+  location              = var.location
+  name                  = "${var.site_name}-wanSecondary"
+  resource_group_name   = var.resource_group_name
   ip_configuration {
     name                          = replace(replace("${var.site_name}-wanIPSecondary", "-", "_"), " ", "_")
     private_ip_address_allocation = "Dynamic"
@@ -127,11 +131,11 @@ resource "azurerm_network_interface" "wan-nic-secondary" {
 }
 
 resource "azurerm_network_interface" "lan-nic-secondary" {
-  ip_forwarding_enabled          = true
-  location                       = var.location
-  name                           = "${var.site_name}-lanSecondary"
-  resource_group_name            = azurerm_resource_group.azure-rg.name
+  ip_forwarding_enabled = true
   accelerated_networking_enabled = true
+  location              = var.location
+  name                  = "${var.site_name}-lanSecondary"
+  resource_group_name   = var.resource_group_name
   ip_configuration {
     name                          = replace(replace("${var.site_name}-lanIPConfigSecondary", "-", "_"), " ", "_")
     private_ip_address_allocation = "Static"
@@ -157,7 +161,7 @@ resource "azurerm_subnet_network_security_group_association" "lan-association" {
 resource "azurerm_network_security_group" "wan-sg" {
   location            = var.location
   name                = replace(replace("${var.site_name}-WANSecurityGroup", "-", "_"), " ", "_")
-  resource_group_name = azurerm_resource_group.azure-rg.name
+  resource_group_name = var.resource_group_name
   depends_on = [
     azurerm_resource_group.azure-rg
   ]
@@ -166,7 +170,7 @@ resource "azurerm_network_security_group" "wan-sg" {
 resource "azurerm_network_security_group" "lan-sg" {
   location            = var.location
   name                = replace(replace("${var.site_name}-LANSecurityGroup", "-", "_"), " ", "_")
-  resource_group_name = azurerm_resource_group.azure-rg.name
+  resource_group_name = var.resource_group_name
   depends_on = [
     azurerm_resource_group.azure-rg
   ]
@@ -177,7 +181,7 @@ resource "azurerm_route_table" "private-rt" {
   bgp_route_propagation_enabled = false
   location                      = var.location
   name                          = replace(replace("${var.site_name}-viaCato", "-", "_"), " ", "_")
-  resource_group_name           = azurerm_resource_group.azure-rg.name
+  resource_group_name           = var.resource_group_name
   depends_on = [
     azurerm_resource_group.azure-rg
   ]
@@ -187,7 +191,7 @@ resource "azurerm_route" "public-rt" {
   address_prefix      = "23.102.135.246/32" #
   name                = "Microsoft-KMS"
   next_hop_type       = "Internet"
-  resource_group_name = azurerm_resource_group.azure-rg.name
+  resource_group_name = var.resource_group_name
   route_table_name    = replace(replace("${var.site_name}-viaCato", "-", "_"), " ", "_")
   depends_on = [
     azurerm_route_table.private-rt
@@ -199,7 +203,7 @@ resource "azurerm_route" "lan-route" {
   name                   = "default-cato"
   next_hop_in_ip_address = var.floating_ip
   next_hop_type          = "VirtualAppliance"
-  resource_group_name    = azurerm_resource_group.azure-rg.name
+  resource_group_name    = var.resource_group_name
   route_table_name       = replace(replace("${var.site_name}-viaCato", "-", "_"), " ", "_")
   depends_on = [
     azurerm_route_table.private-rt
@@ -210,7 +214,7 @@ resource "azurerm_route_table" "public-rt" {
   bgp_route_propagation_enabled = false
   location                      = var.location
   name                          = replace(replace("${var.site_name}-viaInternet", "-", "_"), " ", "_")
-  resource_group_name           = azurerm_resource_group.azure-rg.name
+  resource_group_name           = var.resource_group_name
   depends_on = [
     azurerm_resource_group.azure-rg
   ]
@@ -220,7 +224,7 @@ resource "azurerm_route" "route-internet" {
   address_prefix      = "0.0.0.0/0"
   name                = "default-internet"
   next_hop_type       = "Internet"
-  resource_group_name = azurerm_resource_group.azure-rg.name
+  resource_group_name = var.resource_group_name
   route_table_name    = replace(replace("${var.site_name}-viaInternet", "-", "_"), " ", "_")
   depends_on = [
     azurerm_route_table.public-rt
@@ -269,7 +273,7 @@ locals {
 resource "azurerm_user_assigned_identity" "CatoHaIdentity" {
   location            = var.location
   name                = "CatoHaIdentity"
-  resource_group_name = azurerm_resource_group.azure-rg.name
+  resource_group_name = var.resource_group_name
 }
 
 # Create Primary Vsocket Virtual Machine
@@ -278,7 +282,7 @@ resource "azurerm_virtual_machine" "vsocket_primary" {
   name                         = "${var.site_name}-vSocket-Primary"
   network_interface_ids        = [azurerm_network_interface.wan-nic-primary.id, azurerm_network_interface.lan-nic-primary.id]
   primary_network_interface_id = azurerm_network_interface.wan-nic-primary.id
-  resource_group_name          = azurerm_resource_group.azure-rg.name
+  resource_group_name          = var.resource_group_name
   vm_size                      = var.vm_size
   plan {
     name      = "public-cato-socket"
@@ -304,14 +308,15 @@ resource "azurerm_virtual_machine" "vsocket_primary" {
   depends_on = [
     azurerm_managed_disk.vSocket_disk_primary,
     cato_socket_site.azure-site,
-    data.cato_accountSnapshotSite.azure-site
+    data.cato_accountSnapshotSite.azure-site,
+    data.cato_accountSnapshotSite.azure-site-2
   ]
 }
 
 resource "azurerm_managed_disk" "vSocket_disk_primary" {
   name                 = "${var.site_name}-vSocket-disk-primary"
   location             = var.location
-  resource_group_name  = azurerm_resource_group.azure-rg.name
+  resource_group_name  = var.resource_group_name
   storage_account_type = "Standard_LRS"
   create_option        = "FromImage"
   disk_size_gb         = var.disk_size_gb
@@ -323,23 +328,21 @@ resource "azurerm_managed_disk" "vSocket_disk_primary" {
 }
 
 # To allow mac address to be retrieved
-resource "null_resource" "sleep_5_seconds" {
-  provisioner "local-exec" {
-    command = "sleep 5"
-  }
+resource "time_sleep" "sleep_5_seconds" {
+create_duration = "5s"
   depends_on = [azurerm_virtual_machine.vsocket_primary]
 }
 
 data "azurerm_network_interface" "wannicmac" {
   name                = "${var.site_name}-wanPrimary"
-  resource_group_name = azurerm_resource_group.azure-rg.name
-  depends_on          = [null_resource.sleep_5_seconds]
+  resource_group_name = var.resource_group_name
+  depends_on          = [time_sleep.sleep_5_seconds]
 }
 
 data "azurerm_network_interface" "lannicmac" {
   name                = "${var.site_name}-lanPrimary"
-  resource_group_name = azurerm_resource_group.azure-rg.name
-  depends_on          = [null_resource.sleep_5_seconds]
+  resource_group_name = var.resource_group_name
+  depends_on          = [time_sleep.sleep_5_seconds]
 }
 
 variable "commands" {
@@ -375,17 +378,15 @@ SETTINGS
 }
 
 # To allow socket to upgrade, so secondary socket can be added
-resource "null_resource" "sleep_300_seconds" {
-  provisioner "local-exec" {
-    command = "sleep 300"
-  }
+resource "time_sleep" "sleep_300_seconds" {
+  create_duration = "300s"
   depends_on = [azurerm_virtual_machine_extension.vsocket-custom-script-primary]
 }
 
 #################################################################################
 # Add secondary socket to site via API until socket_site resource is updated to natively support
 resource "null_resource" "configure_secondary_azure_vsocket" {
-  depends_on = [null_resource.sleep_300_seconds]
+  depends_on = [time_sleep.sleep_300_seconds]
 
   provisioner "local-exec" {
     command = <<EOF
@@ -441,7 +442,7 @@ resource "azurerm_virtual_machine" "vsocket_secondary" {
   name                         = "${var.site_name}-vSocket-Secondary"
   network_interface_ids        = [azurerm_network_interface.wan-nic-secondary.id, azurerm_network_interface.lan-nic-secondary.id]
   primary_network_interface_id = azurerm_network_interface.wan-nic-secondary.id
-  resource_group_name          = azurerm_resource_group.azure-rg.name
+  resource_group_name          = var.resource_group_name
   vm_size                      = var.vm_size
   plan {
     name      = "public-cato-socket"
@@ -467,7 +468,8 @@ resource "azurerm_virtual_machine" "vsocket_secondary" {
   depends_on = [
     azurerm_managed_disk.vSocket_disk_secondary,
     data.cato_accountSnapshotSite.azure-site-secondary,
-    null_resource.configure_secondary_azure_vsocket
+    null_resource.configure_secondary_azure_vsocket,
+    data.cato_accountSnapshotSite.azure-site-2
   ]
 }
 
@@ -475,7 +477,7 @@ resource "azurerm_managed_disk" "vSocket_disk_secondary" {
   depends_on           = [data.cato_accountSnapshotSite.azure-site-secondary]
   name                 = "${var.site_name}-vSocket-disk-secondary"
   location             = var.location
-  resource_group_name  = azurerm_resource_group.azure-rg.name
+  resource_group_name  = var.resource_group_name
   storage_account_type = "Standard_LRS"
   create_option        = "FromImage"
   disk_size_gb         = var.disk_size_gb
@@ -487,23 +489,21 @@ resource "azurerm_managed_disk" "vSocket_disk_secondary" {
 }
 
 #Sleep to allow Secondary vSocket interface mac address retrieval
-resource "null_resource" "sleep_5_seconds-2" {
-  provisioner "local-exec" {
-    command = "sleep 5"
-  }
+resource "time_sleep" "sleep_5_seconds-2" {
+  create_duration = "5s"
   depends_on = [azurerm_virtual_machine.vsocket_secondary]
 }
 
 data "azurerm_network_interface" "wannicmac-2" {
   name                = "${var.site_name}-wanSecondary"
-  resource_group_name = azurerm_resource_group.azure-rg.name
-  depends_on          = [null_resource.sleep_5_seconds-2]
+  resource_group_name = var.resource_group_name
+  depends_on          = [time_sleep.sleep_5_seconds-2]
 }
 
 data "azurerm_network_interface" "lannicmac-2" {
   name                = "${var.site_name}-lanSecondary"
-  resource_group_name = azurerm_resource_group.azure-rg.name
-  depends_on          = [null_resource.sleep_5_seconds-2]
+  resource_group_name = var.resource_group_name
+  depends_on          = [time_sleep.sleep_5_seconds-2]
 }
 
 variable "commands-secondary" {
@@ -540,10 +540,10 @@ resource "null_resource" "run_command_ha_primary" {
   provisioner "local-exec" {
     command = <<EOT
       az vm run-command invoke \
-        --resource-group ${azurerm_resource_group.azure-rg.name} \
+        --resource-group ${var.resource_group_name} \
         --name "${var.site_name}-vSocket-Primary" \
         --command-id RunShellScript \
-        --scripts "echo '{\"location\": \"${var.location}\", \"subscription_id\": \"${var.azure_subscription_id}\", \"vnet\": \"${azurerm_virtual_network.vnet.name}\", \"group\": \"${azurerm_resource_group.azure-rg.name}\", \"vnet_group\": \"${azurerm_resource_group.azure-rg.name}\", \"subnet\": \"${azurerm_subnet.subnet-lan.name}\", \"nic\": \"${azurerm_network_interface.lan-nic-primary.name}\", \"ha_nic\": \"${azurerm_network_interface.lan-nic-secondary.name}\", \"lan_nic_ip\": \"${azurerm_network_interface.lan-nic-primary.private_ip_address}\", \"lan_nic_mac\": \"${azurerm_network_interface.lan-nic-primary.mac_address}\", \"subnet_cidr\": \"${var.subnet_range_lan}\", \"az_mgmt_url\": \"management.azure.com\"}' > /cato/socket/configuration/vm_config.json"
+        --scripts "echo '{\"location\": \"${var.location}\", \"subscription_id\": \"${var.azure_subscription_id}\", \"vnet\": \"${var.vnet_name}\", \"group\": \"${var.resource_group_name}\", \"vnet_group\": \"${var.resource_group_name}\", \"subnet\": \"${azurerm_subnet.subnet-lan.name}\", \"nic\": \"${azurerm_network_interface.lan-nic-primary.name}\", \"ha_nic\": \"${azurerm_network_interface.lan-nic-secondary.name}\", \"lan_nic_ip\": \"${azurerm_network_interface.lan-nic-primary.private_ip_address}\", \"lan_nic_mac\": \"${azurerm_network_interface.lan-nic-primary.mac_address}\", \"subnet_cidr\": \"${var.subnet_range_lan}\", \"az_mgmt_url\": \"management.azure.com\"}' > /cato/socket/configuration/vm_config.json"
     EOT
   }
 
@@ -556,10 +556,10 @@ resource "null_resource" "run_command_ha_secondary" {
   provisioner "local-exec" {
     command = <<EOT
       az vm run-command invoke \
-        --resource-group ${azurerm_resource_group.azure-rg.name} \
+        --resource-group ${var.resource_group_name} \
         --name "${var.site_name}-vSocket-Secondary" \
         --command-id RunShellScript \
-        --scripts "echo '{\"location\": \"${var.location}\", \"subscription_id\": \"${var.azure_subscription_id}\", \"vnet\": \"${azurerm_virtual_network.vnet.name}\", \"group\": \"${azurerm_resource_group.azure-rg.name}\", \"vnet_group\": \"${azurerm_resource_group.azure-rg.name}\", \"subnet\": \"${azurerm_subnet.subnet-lan.name}\", \"nic\": \"${azurerm_network_interface.lan-nic-secondary.name}\", \"ha_nic\": \"${azurerm_network_interface.lan-nic-primary.name}\", \"lan_nic_ip\": \"${azurerm_network_interface.lan-nic-secondary.private_ip_address}\", \"lan_nic_mac\": \"${azurerm_network_interface.lan-nic-secondary.mac_address}\", \"subnet_cidr\": \"${var.subnet_range_lan}\", \"az_mgmt_url\": \"management.azure.com\"}' > /cato/socket/configuration/vm_config.json"
+        --scripts "echo '{\"location\": \"${var.location}\", \"subscription_id\": \"${var.azure_subscription_id}\", \"vnet\": \"${var.vnet_name}\", \"group\": \"${var.resource_group_name}\", \"vnet_group\": \"${var.resource_group_name}\", \"subnet\": \"${azurerm_subnet.subnet-lan.name}\", \"nic\": \"${azurerm_network_interface.lan-nic-secondary.name}\", \"ha_nic\": \"${azurerm_network_interface.lan-nic-primary.name}\", \"lan_nic_ip\": \"${azurerm_network_interface.lan-nic-secondary.private_ip_address}\", \"lan_nic_mac\": \"${azurerm_network_interface.lan-nic-secondary.mac_address}\", \"subnet_cidr\": \"${var.subnet_range_lan}\", \"az_mgmt_url\": \"management.azure.com\"}' > /cato/socket/configuration/vm_config.json"
     EOT
   }
 
@@ -584,7 +584,7 @@ resource "azurerm_role_assignment" "secondary_nic_ha_role" {
 resource "azurerm_role_assignment" "lan-subnet-role" {
   principal_id         = azurerm_user_assigned_identity.CatoHaIdentity.principal_id
   role_definition_name = "Virtual Machine Contributor"
-  scope                = "/subscriptions/${var.azure_subscription_id}/resourcegroups/${azurerm_resource_group.azure-rg.name}/providers/Microsoft.Network/virtualNetworks/${azurerm_virtual_network.vnet.name}/subnets/${azurerm_subnet.subnet-lan.name}"
+  scope                = "/subscriptions/${var.azure_subscription_id}/resourcegroups/${var.resource_group_name}/providers/Microsoft.Network/virtualNetworks/${var.vnet_name}/subnets/${azurerm_subnet.subnet-lan.name}"
   depends_on           = [azurerm_user_assigned_identity.CatoHaIdentity]
 }
 
@@ -592,23 +592,21 @@ resource "azurerm_role_assignment" "lan-subnet-role" {
 resource "azurerm_role_assignment" "primary_nic_ha_role" {
   principal_id         = azurerm_user_assigned_identity.CatoHaIdentity.principal_id
   role_definition_name = "Virtual Machine Contributor"
-  scope                = "/subscriptions/${var.azure_subscription_id}/resourcegroups/${azurerm_resource_group.azure-rg.name}/providers/Microsoft.Network/networkInterfaces/${azurerm_network_interface.lan-nic-primary.name}"
+  scope                = "/subscriptions/${var.azure_subscription_id}/resourcegroups/${var.resource_group_name}/providers/Microsoft.Network/networkInterfaces/${azurerm_network_interface.lan-nic-primary.name}"
   depends_on           = [azurerm_user_assigned_identity.CatoHaIdentity]
 }
 
 # Time delay to allow for vsockets to upgrade
-resource "null_resource" "delay" {
+resource "time_sleep" "delay" {
+  create_duration = "10s"
   depends_on = [null_resource.run_command_ha_secondary]
-  provisioner "local-exec" {
-    command = "sleep 10"
-  }
 }
 
 # Reboot both vsockets
 resource "null_resource" "reboot_vsocket_primary" {
   provisioner "local-exec" {
     command = <<EOT
-      az vm restart --resource-group "${azurerm_resource_group.azure-rg.name}" --name "${var.site_name}-vSocket-Primary"
+      az vm restart --resource-group "${var.resource_group_name}" --name "${var.site_name}-vSocket-Primary"
     EOT
   }
 
@@ -620,7 +618,7 @@ resource "null_resource" "reboot_vsocket_primary" {
 resource "null_resource" "reboot_vsocket_secondary" {
   provisioner "local-exec" {
     command = <<EOT
-      az vm restart --resource-group "${azurerm_resource_group.azure-rg.name}" --name "${var.site_name}-vSocket-Secondary"
+      az vm restart --resource-group "${var.resource_group_name}" --name "${var.site_name}-vSocket-Secondary"
     EOT
   }
 
@@ -630,11 +628,46 @@ resource "null_resource" "reboot_vsocket_secondary" {
 }
 
 # Time delay to allow for vsockets HA to complete configuration
-resource "null_resource" "delay-ha" {
+resource "time_sleep" "delay-ha" {
+  create_duration = "75s"
   depends_on = [null_resource.reboot_vsocket_secondary]
+}
+
+# Allow vSocket to be disconnected to delete site
+resource "null_resource" "sleep_before_delete" {
   provisioner "local-exec" {
-    command = "sleep 75"
+    when    = destroy
+    command = "sleep 10"
   }
+}
+
+data "cato_accountSnapshotSite" "azure-site-2" {
+  id         = cato_socket_site.azure-site.id
+  depends_on = [null_resource.sleep_before_delete]
+}
+
+locals {
+  lan_first_ip = cidrhost(var.subnet_range_lan, 1)
+}
+
+# Routed Networks for peered VNETS or other subnets to be reached over the socket
+resource "cato_network_range" "routedAzure" {
+  count      = length(var.routed_ranges)
+  site_id    = cato_socket_site.azure-site.id
+  name       = var.routed_ranges_names[count.index]
+  range_type = "Routed"
+  gateway    = local.lan_first_ip
+  subnet     = var.routed_ranges[count.index]
+}
+# Update socket Bandwidth
+resource "cato_wan_interface" "wan" {
+  site_id              = cato_socket_site.azure-site.id
+  interface_id         = "WAN1"
+  name                 = "WAN 1"
+  upstream_bandwidth   = var.upstream_bandwidth
+  downstream_bandwidth = var.downstream_bandwidth
+  role                 = "wan_1"
+  precedence           = "ACTIVE"
 }
 
 # Cato license resource

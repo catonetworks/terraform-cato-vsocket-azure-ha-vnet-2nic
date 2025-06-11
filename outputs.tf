@@ -1,9 +1,4 @@
 ## The following attributes are exported:
-output "resource_group_name" {
-  description = "The name of the Azure Resource Group used for deployment."
-  value       = azurerm_resource_group.azure-rg.name
-}
-
 output "wan_nic_name_primary" {
   description = "The name of the primary WAN network interface."
   value       = azurerm_network_interface.wan-nic-primary.name
@@ -27,11 +22,6 @@ output "lan_nic_name_secondary" {
 output "lan_subnet_id" {
   description = "The ID of the LAN subnet within the virtual network."
   value       = azurerm_subnet.subnet-lan.id
-}
-
-output "vnet_name" {
-  description = "The name of the Azure Virtual Network used by the deployment."
-  value       = azurerm_virtual_network.vnet.name
 }
 
 output "lan_subnet_name" {
@@ -77,7 +67,7 @@ output "lan_primary_nic_mac_address" {
 }
 
 output "wan_primary_nic_mac_address" {
-  description = "MAC of the LAN Primary Network Interface"
+  description = "MAC of the WAN Primary Network Interface"
   value       = azurerm_network_interface.wan-nic-primary
 }
 
@@ -108,7 +98,7 @@ output "lan_secondary_nic_mac_address" {
 }
 
 output "wan_secondary_nic_mac_address" {
-  description = "MAC of the LAN Secondary Network Interface"
+  description = "MAC of the WAN Secondary Network Interface"
   value       = azurerm_network_interface.wan-nic-secondary
 }
 

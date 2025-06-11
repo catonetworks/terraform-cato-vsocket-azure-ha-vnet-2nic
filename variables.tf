@@ -2,6 +2,7 @@
 ## Cato Provider Variables
 variable "token" {
   description = "API token used to authenticate with the Cato Networks API."
+  sensitive = true
 }
 
 variable "account_id" {
@@ -47,9 +48,30 @@ variable "site_location" {
 
 
 ## VNET Variables
+variable "create_resource_group" {
+  description = "Resource group creation true will create and false will use exsiting"
+  type        = bool
+}
+variable "resource_group_name" {
+  description = "Resource group name required if you want to deploy into existing Resource group"
+  type        = string
+}
+
+variable "vnet_id" {
+  description = "VNET ID required if you want to deploy into existing VNET"
+  type        = string
+  default     = null
+}
+
+variable "vnet_name" {
+  description = "VNET Name required if you want to deploy into existing VNET"
+  type        = string
+}
+
 variable "azure_subscription_id" {
   description = "The Azure Subscription ID where the resources will be created. Example: 00000000-0000-0000-0000-000000000000"
   type        = string
+  sensitive = true
 }
 
 variable "location" {
@@ -85,16 +107,6 @@ variable "dns_servers" {
   ]
 }
 
-# variable "subnet_range_mgmt" {
-#   type        = string
-#   description = <<EOT
-#     Choose a range within the VPC to use as the Management subnet. This subnet will be used initially to access the public internet and register your vSocket to the Cato Cloud.
-#     The minimum subnet length to support High Availability is /28.
-#     The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X
-# 	EOT
-#   default     = null
-# }
-
 variable "subnet_range_wan" {
   type        = string
   description = <<EOT
@@ -125,6 +137,18 @@ variable "vnet_prefix" {
   default     = null
 }
 
+variable "routed_ranges" {
+  description = "Routed ranges to be accessed behind the vSocket site"
+  type        = list(string)
+  default     = null
+}
+
+variable "routed_ranges_names" {
+  description = "Routed ranges names"
+  type        = list(string)
+  default     = null
+}
+
 variable "vm_size" {
   description = "(Required) Specifies the size of the Virtual Machine. See Azure VM Naming Conventions: https://learn.microsoft.com/en-us/azure/virtual-machines/vm-naming-conventions"
   type        = string
@@ -145,6 +169,19 @@ variable "image_reference_id" {
   description = "The path to the image used to deploy a specific version of the virtual socket."
   type        = string
   default     = "/Subscriptions/38b5ec1d-b3b6-4f50-a34e-f04a67121955/Providers/Microsoft.Compute/Locations/eastus/Publishers/catonetworks/ArtifactTypes/VMImage/Offers/cato_socket/Skus/public-cato-socket/Versions/21.0.18517"
+}
+
+## Socket interface settings
+variable "upstream_bandwidth" {
+  description = "Sockets upstream interface WAN Bandwidth in Mbps"
+  type = string
+  default = "null"
+}
+
+variable "downstream_bandwidth" {
+  description = "Sockets downstream interface WAN Bandwidth in Mbps"
+  type = string
+  default = "null"
 }
 
 variable "license_id" {
