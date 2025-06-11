@@ -22,12 +22,12 @@ provider "azurerm" {
 
 provider "cato" {
   baseurl    = var.baseurl
-  token      = var.token
-  account_id = var.account_id
+  token      = "xxxxxxxxxxxx"
+  account_id = "xxxxxxxxxxxx"
 }
 
 module "vsocket-azure-ha-vnet-2nic" {
-  source                = "catonetworks/terraform-cato-vsocket-azure-ha-vnet-2nic"
+  source                = "catonetworks/vsocket-azure-ha-vnet-2nic/cato"
   token                 = "xxxxxxx"
   account_id            = "xxxxxxx"
   azure_subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
