@@ -27,3 +27,8 @@
 
 ### Features
 - Updated README.md with further instructions for module use
+
+## 0.0.6 (2025-06-11)
+
+### Features
+- Updated README.md to correct module path
