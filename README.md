@@ -1,6 +1,8 @@
 # CATO 2 NIC VSOCKET Azure HA VNET Terraform module
 
-Terraform module which creates a VNET in Azure, required subnets, network interfaces, security groups, route tables, an Azure Socket HA Site in the Cato Management Application (CMA), and deploys a 2 nic primary and secondary virtual socket VM instance in Azure and configures them as HA.
+Terraform module which creates a VNET in Azure, required subnets, network interfaces, security groups, route tables, an Azure Socket HA Site in the Cato Management Application (CMA) ,optionally updates sockets bandwidth, add routed ranges with names and deploys a 2 nic primary and secondary virtual socket VM instance in Azure and configures them as HA.
+
+You can also use an existing VNET and or Resource group following the instructions in the module.
 
 ## NOTE
 - The current API that the Cato provider is calling requires sequential execution. You can either use depends_on or specify the parallelism flag.
@@ -20,7 +22,7 @@ provider "azurerm" {
 
 provider "cato" {
   baseurl    = var.baseurl
-  token      = var.cato_token
+  token      = var.token
   account_id = var.account_id
 }
 
@@ -30,10 +32,10 @@ module "vsocket-azure-ha-vnet-2nic" {
   account_id            = "xxxxxxx"
   azure_subscription_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
   location              = "West Europe"
-  vnet_name             = "Your VNET Name"
-  vnet_id               = null #add vnet id if already created, example "/subscriptions/abcd1234-12ab-1234-5678-1234abcd/resourceGroups/Your_resource_group_name/providers/Microsoft.Network/virtualNetworks/Azure_customVNET"
+  vnet_name             = "Your VNET Name" # Required for both creating or using existing VNET
+  vnet_id               = null   # Replace null with VNET id to use existing. exampleId "/subscriptions/abcd1234-12ab-1234-5678-1234abcd/resourceGroups/Your_resource_group_name/providers/Microsoft.Network/virtualNetworks/Azure_customVNET"
   resource_group_name   = "Your Resource Group Name"
-  create_resource_group = true # Set to false if you want to deploy to existing Resource Group
+  create_resource_group = true # Set to false if you want to deploy to existing Resource Group and provide current name to resource_group_name
   vnet_prefix           = "10.113.0.0/16"
   subnet_range_wan      = "10.113.2.0/24"
   subnet_range_lan      = "10.113.3.128/25"

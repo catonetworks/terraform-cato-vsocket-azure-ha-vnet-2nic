@@ -22,3 +22,8 @@
 - Added optional variable for use of existing Resource Group
 - Added optional variable for use of existing VNET
 - Fixed error on Cato site deletion
+
+## 0.0.5 (2025-06-11)
+
+### Features
+- Updated README.md with further instructions for module use
