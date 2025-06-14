@@ -149,6 +149,12 @@ variable "routed_ranges_names" {
   default     = null
 }
 
+variable "routed_ranges_gateway" {
+  description = "Routed ranges gateway"
+  type        = string
+  default     = null
+}
+
 variable "vm_size" {
   description = "(Required) Specifies the size of the Virtual Machine. See Azure VM Naming Conventions: https://learn.microsoft.com/en-us/azure/virtual-machines/vm-naming-conventions"
   type        = string
@@ -182,6 +188,25 @@ variable "downstream_bandwidth" {
   description = "Sockets downstream interface WAN Bandwidth in Mbps"
   type = string
   default = "null"
+}
+
+# Avalability Zones and sets
+variable "availability_set_id" {
+  description = "Availability set ID"
+  type = string
+  default = null
+}
+
+variable "vsocket_primary_zone" {
+  description = "Primary vsocket Availability Zone"
+  type = string
+  default = null
+}
+
+variable "vsocket_secondary_zone" {
+  description = "Secondary vsocket Availability Zone"
+  type = string
+  default = null
 }
 
 variable "license_id" {

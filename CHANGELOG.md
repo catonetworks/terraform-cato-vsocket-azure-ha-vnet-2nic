@@ -27,3 +27,11 @@
 
 ### Features
 - Updated README.md with further instructions for module use
+
+## 0.0.6 (2025-06-14)
+
+### Features
+- Updated README.md with new optional configuration
+- Updated null_resources to terraform_data
+- Added optional variable to configure custom gateway for routed ranges
+- Added optional variable to configure avalability zones and sets

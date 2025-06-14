@@ -44,6 +44,7 @@ module "vsocket-azure-ha-vnet-2nic" {
   floating_ip           = "10.113.3.137"
   routed_ranges         = ["10.100.0.0/24", "10.100.1.0/24"] # Add routed ranges for Cato site
   routed_ranges_names   = ["VOIP subnet 100", "DC_Server subnet 100.1"] # Add routed ranges names for Cato site
+  routed_ranges_gateway = null  # null will use first usable IP in lan subnet can add custom if required example "10.113.3.129" 
   upstream_bandwidth    = 1000
   downstream_bandwidth  = 1000
   site_name             = "Your Site name here"
