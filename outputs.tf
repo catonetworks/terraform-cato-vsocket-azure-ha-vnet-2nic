@@ -84,12 +84,12 @@ output "lan_secondary_nic_id" {
 # Virtual Machine Outputs
 output "vsocket_primary_vm_id" {
   description = "ID of the Primary vSocket Virtual Machine"
-  value       = azurerm_virtual_machine.vsocket_primary.id
+  value       = azurerm_linux_virtual_machine.vsocket_primary.id
 }
 
 output "vsocket_primary_vm_name" {
   description = "Name of the Primary vSocket Virtual Machine"
-  value       = azurerm_virtual_machine.vsocket_primary.name
+  value       = azurerm_linux_virtual_machine.vsocket_primary.name
 }
 
 output "lan_secondary_nic_mac_address" {
@@ -104,33 +104,12 @@ output "wan_secondary_nic_mac_address" {
 
 output "vsocket_secondary_vm_id" {
   description = "ID of the Secondary vSocket Virtual Machine"
-  value       = azurerm_virtual_machine.vsocket_secondary.id
+  value       = azurerm_linux_virtual_machine.vsocket_secondary.id
 }
 
 output "vsocket_secondary_vm_name" {
   description = "Name of the Secondary vSocket Virtual Machine"
-  value       = azurerm_virtual_machine.vsocket_secondary.name
-}
-
-# Managed Disks Outputs
-output "primary_disk_id" {
-  description = "ID of the Primary vSocket Managed Disk"
-  value       = azurerm_managed_disk.vSocket_disk_primary.id
-}
-
-output "primary_disk_name" {
-  description = "Name of the Primary vSocket Managed Disk"
-  value       = azurerm_managed_disk.vSocket_disk_primary.name
-}
-
-output "secondary_disk_id" {
-  description = "ID of the Secondary vSocket Managed Disk"
-  value       = azurerm_managed_disk.vSocket_disk_secondary.id
-}
-
-output "secondary_disk_name" {
-  description = "Name of the Secondary vSocket Managed Disk"
-  value       = azurerm_managed_disk.vSocket_disk_secondary.name
+  value       = azurerm_linux_virtual_machine.vsocket_secondary.name
 }
 
 # User Assigned Identity
@@ -186,4 +165,9 @@ output "cato_license_site" {
     license_info = cato_license.license[0].license_info
     site_id      = cato_license.license[0].site_id
   }
+}
+
+#Output MAC addess of Secondary LAN interface
+output "lan-sec-mac" {
+  value = azurerm_network_interface.lan-nic-secondary.mac_address
 }
