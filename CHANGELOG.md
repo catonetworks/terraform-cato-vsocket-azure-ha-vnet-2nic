@@ -44,3 +44,25 @@
 - Added optional variable to configure custom gateway for routed ranges
 - Added optional variable to configure avalability zones and sets
 
+## 0.1.0 (2025-06-25)
+
+### Features
+- **VM Customization**: Introduced variables (`vm_os_disk_config`, `vm_image_config`, `enable_boot_diagnostics`) for greater control over the primary VM's OS disk, marketplace image, and boot diagnostics.
+- **Resource Tagging**: Added a `tags` variable to apply custom tags to all created Azure resources for improved organization and cost tracking.
+- **Automatic Site Location**: Added logic to automatically determine the Cato Site Location based on the specified Azure region, simplifying setup. Manual override is available.
+- **Enhanced Network Configuration**: The `routed_networks` variable now uses a `map(string)` for a more stable and predictable configuration of routed ranges.
+- **New Outputs**: Added comprehensive outputs for resource IDs, names, and properties (e.g., VM IDs, NIC details, Cato site info).
+
+### Changed
+- **Major Code Refactoring**: The module has been significantly refactored for improved readability, maintainability, and robustness.
+  - Code is now split into logical files (`variables.tf`, `locals.tf`, `outputs.tf`, etc.).
+  - Replaced the deprecated `azurerm_virtual_machine` resource with `azurerm_linux_virtual_machine`.
+  - Switched to the `templatefile()` function for generating inline scripts, making them easier to manage.
+  - Resource naming is now more consistent and dynamic (e.g., User-Assigned Identity).
+- **Variable Enhancements**:
+  - Enforced strict type constraints on all variables.
+  - Marked sensitive variables like `token` and `azure_subscription_id` as `sensitive`.
+- **Dependency Management**: Pinned provider versions in `versions.tf` to ensure repeatable deployments.
+
+### Removed
+- **Simplified VNet Input**: Removed the need to provide a VNet ID directly. The module now handles this logic internally.

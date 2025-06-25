@@ -2,7 +2,8 @@
 ## Cato Provider Variables
 variable "token" {
   description = "API token used to authenticate with the Cato Networks API."
-  sensitive = true
+  sensitive   = true
+  type        = string
 }
 
 variable "account_id" {
@@ -38,12 +39,19 @@ variable "site_type" {
 }
 
 variable "site_location" {
+  description = "Site location which is used by the Cato Socket to connect to the closest Cato PoP. If not specified, the location will be derived from the Azure region dynamicaly."
   type = object({
     city         = string
     country_code = string
     state_code   = string
     timezone     = string
   })
+  default = {
+    city         = null
+    country_code = null
+    state_code   = null ## Optional - for countries with states
+    timezone     = null
+  }
 }
 
 
@@ -57,12 +65,6 @@ variable "resource_group_name" {
   type        = string
 }
 
-variable "vnet_id" {
-  description = "VNET ID required if you want to deploy into existing VNET"
-  type        = string
-  default     = null
-}
-
 variable "vnet_name" {
   description = "VNET Name required if you want to deploy into existing VNET"
   type        = string
@@ -71,7 +73,7 @@ variable "vnet_name" {
 variable "azure_subscription_id" {
   description = "The Azure Subscription ID where the resources will be created. Example: 00000000-0000-0000-0000-000000000000"
   type        = string
-  sensitive = true
+  sensitive   = true
 }
 
 variable "location" {
@@ -137,20 +139,24 @@ variable "vnet_prefix" {
   default     = null
 }
 
-variable "routed_ranges" {
-  description = "Routed ranges to be accessed behind the vSocket site"
-  type        = list(string)
-  default     = null
+
+variable "routed_networks" {
+  description = <<EOF
+  A map of routed networks to be accessed behind the vSocket site. The key is the network name and the value is the CIDR range.
+  Example: 
+  routed_networks = {
+  "Peered-VNET-1" = "10.100.1.0/24"
+  "On-Prem-Network" = "192.168.50.0/24"
+  "Management-Subnet" = "10.100.2.0/25"
+  }
+  EOF
+  type        = map(string)
+  default     = {} # Default to an empty map instead of null.
 }
 
-variable "routed_ranges_names" {
-  description = "Routed ranges names"
-  type        = list(string)
-  default     = null
-}
-
+# This variable remains the same as it applies to all networks.
 variable "routed_ranges_gateway" {
-  description = "Routed ranges gateway"
+  description = "Routed ranges gateway. If null, the first IP of the LAN subnet will be used."
   type        = string
   default     = null
 }
@@ -161,52 +167,24 @@ variable "vm_size" {
   default     = "Standard_D2s_v5"
 }
 
-variable "disk_size_gb" {
-  description = "Size of the managed disk in GB."
-  type        = number
-  default     = 8
-  validation {
-    condition     = var.disk_size_gb > 0
-    error_message = "Disk size must be greater than 0."
-  }
-}
-
-variable "image_reference_id" {
-  description = "The path to the image used to deploy a specific version of the virtual socket."
-  type        = string
-  default     = "/Subscriptions/38b5ec1d-b3b6-4f50-a34e-f04a67121955/Providers/Microsoft.Compute/Locations/eastus/Publishers/catonetworks/ArtifactTypes/VMImage/Offers/cato_socket/Skus/public-cato-socket/Versions/21.0.18517"
-}
-
 ## Socket interface settings
 variable "upstream_bandwidth" {
   description = "Sockets upstream interface WAN Bandwidth in Mbps"
-  type = string
-  default = "null"
+  type        = string
+  default     = "null"
 }
 
 variable "downstream_bandwidth" {
   description = "Sockets downstream interface WAN Bandwidth in Mbps"
-  type = string
-  default = "null"
+  type        = string
+  default     = "null"
 }
 
 # Avalability Zones and sets
 variable "availability_set_id" {
   description = "Availability set ID"
-  type = string
-  default = null
-}
-
-variable "vsocket_primary_zone" {
-  description = "Primary vsocket Availability Zone"
-  type = string
-  default = null
-}
-
-variable "vsocket_secondary_zone" {
-  description = "Secondary vsocket Availability Zone"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "license_id" {
@@ -219,4 +197,62 @@ variable "license_bw" {
   description = "The license bandwidth number for the cato site, specifying bandwidth ONLY applies for pooled licenses.  For a standard site license that is not pooled, leave this value null. Must be a number greater than 0 and an increment of 10."
   type        = string
   default     = null
+}
+
+variable "create_vnet" {
+  description = "Whether or not to create the Vnet, or use existing Vnet"
+  type        = bool
+  default     = false
+}
+
+variable "native_network_range" {
+  description = "Cato Native Network Range for the Site"
+  type        = string
+  default     = null
+}
+
+variable "vm_os_disk_config" {
+  description = "Configuration for the Virtual Machine's OS disk."
+  type = object({
+    name_suffix          = string
+    caching              = string
+    storage_account_type = string
+    disk_size_gb         = number
+  })
+  default = {
+    name_suffix          = "vSocket-disk-primary"
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+    disk_size_gb         = 8
+  }
+}
+
+variable "vm_image_config" {
+  description = "Configuration for the Marketplace image, including plan and source image reference."
+  type = object({
+    publisher = string
+    offer     = string
+    product   = string
+    sku       = string
+    version   = string
+  })
+  default = {
+    publisher = "catonetworks"
+    offer     = "cato_socket"
+    product   = "cato_socket"
+    sku       = "public-cato-socket"
+    version   = "23.0.19605"
+  }
+}
+
+variable "enable_boot_diagnostics" {
+  description = "If true, enables boot diagnostics with a managed storage account. If false, disables it."
+  type        = bool
+  default     = true
+}
+
+variable "tags" { 
+  description = "A Map of Strings to describe infrastructure"
+  type = map(string)
+  default = {}
 }
