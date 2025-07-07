@@ -1,9 +1,9 @@
 # This template generates the run-command for the primary vSocket.
 # It writes a JSON configuration file to the VM.
-# Variables like ${site_name} are placeholders that Terraform will fill in.
+# Variables like vsocket_primary_name are placeholders that Terraform will fill in.
 
 az vm run-command invoke \
   --resource-group "${resource_group_name}" \
-  --name "${site_name}-vSocket-Primary" \
+  --name "${vsocket_primary_name}" \
   --command-id RunShellScript \
   --scripts "echo '{\"location\": \"${location}\", \"subscription_id\": \"${subscription_id}\", \"vnet\": \"${vnet_name}\", \"group\": \"${resource_group_name}\", \"vnet_group\": \"${resource_group_name}\", \"subnet\": \"${subnet_name}\", \"nic\": \"${primary_nic_name}\", \"ha_nic\": \"${secondary_nic_name}\", \"lan_nic_ip\": \"${primary_nic_ip}\", \"lan_nic_mac\": \"${primary_nic_mac}\", \"subnet_cidr\": \"${subnet_range_lan}\", \"az_mgmt_url\": \"management.azure.com\"}' > /cato/socket/configuration/vm_config.json"

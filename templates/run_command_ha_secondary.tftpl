@@ -3,6 +3,6 @@
 
 az vm run-command invoke \
   --resource-group "${resource_group_name}" \
-  --name "${site_name}-vSocket-Secondary" \
+  --name "${vsocket_secondary_name}" \
   --command-id RunShellScript \
   --scripts "echo '{\"location\": \"${location}\", \"subscription_id\": \"${subscription_id}\", \"vnet\": \"${vnet_name}\", \"group\": \"${resource_group_name}\", \"vnet_group\": \"${resource_group_name}\", \"subnet\": \"${subnet_name}\", \"nic\": \"${secondary_nic_name}\", \"ha_nic\": \"${primary_nic_name}\", \"lan_nic_ip\": \"${secondary_nic_ip}\", \"lan_nic_mac\": \"${secondary_nic_mac}\", \"subnet_cidr\": \"${subnet_range_lan}\", \"az_mgmt_url\": \"management.azure.com\"}' > /cato/socket/configuration/vm_config.json"

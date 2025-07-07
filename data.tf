@@ -15,13 +15,13 @@ data "cato_accountSnapshotSite" "azure-site-secondary" {
 }
 
 data "azurerm_network_interface" "wannicmac-2" {
-  name                = "${var.site_name}-wanSecondary"
+  name                = "${var.resource_prefix_name}-wanSecondary"
   resource_group_name = local.resource_group_name
   depends_on          = [time_sleep.sleep_5_seconds-2]
 }
 
 data "azurerm_network_interface" "lannicmac-2" {
-  name                = "${var.site_name}-lanSecondary"
+  name                = "${var.resource_prefix_name}-lanSecondary"
   resource_group_name = local.resource_group_name
   depends_on          = [time_sleep.sleep_5_seconds-2]
 }

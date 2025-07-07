@@ -75,6 +75,7 @@ locals {
     "switzerlandwest"    = { city = "Gen\u00c3\u00a8ve", state = null, country = "Switzerland", continent = "Europe", timezone = "UTC+1" }
     "uksouth"            = { city = "London", state = null, country = "United Kingdom", continent = "Europe", timezone = "UTC+0" }
     "ukwest"             = { city = "Cardiff", state = null, country = "United Kingdom", continent = "Europe", timezone = "UTC+0" }
+    "polandcentral"      = { city = "Warsaw", state = null, country = "Poland", continent = "Europe", timezone = "UTC+1" }
 
     # Asia Pacific
     "eastasia"        = { city = "Hong Kong", state = null, country = "Hong Kong", continent = "Asia Pacific", timezone = "UTC+8" }

@@ -60,9 +60,39 @@ variable "create_resource_group" {
   description = "Resource group creation true will create and false will use exsiting"
   type        = bool
 }
+
 variable "resource_group_name" {
   description = "Resource group name required if you want to deploy into existing Resource group"
   type        = string
+}
+
+variable "resource_prefix_name" {
+  description = "Prefix used for Azure resource names. Must conform to Azure naming restrictions."
+  type        = string
+
+  validation {
+    condition = (
+      # Not starting with underscore
+      can(regex("^[^_]", var.resource_prefix_name)) &&
+      # Not ending with dot or hyphen
+      can(regex("[^.-]$", var.resource_prefix_name)) &&
+      # Allowed characters only: a-zA-Z0-9 . _ -
+      can(regex("^[a-zA-Z0-9._-]+$", var.resource_prefix_name)) &&
+      # No forbidden special characters or whitespace
+      !can(regex("[\\s\\\\/\"\\[\\]:|<>+=;,\\?*@&#%]", var.resource_prefix_name))
+    )
+    error_message = <<EOT
+Invalid resource_prefix_name.
+
+The value must:
+- Not begin with an underscore (_)
+- Not end with a hyphen (-) or period (.)
+- Only include letters, digits, hyphens (-), underscores (_), and periods (.)
+- Not contain any of the following: \ / " [ ] : | < > + = ; , ? * @ & # % or whitespace
+
+Example of a valid name: "app_prefix-01.cato"
+EOT
+  }
 }
 
 variable "vnet_name" {
@@ -255,4 +285,58 @@ variable "tags" {
   description = "A Map of Strings to describe infrastructure"
   type = map(string)
   default = {}
+}
+
+variable "vsocket_primary_zone" {
+  description = "Primary vsocket Availability Zone"
+  type = string
+  default = null
+}
+
+variable "vsocket_secondary_zone" {
+  description = "Secondary vsocket Availability Zone"
+  type = string
+  default = null
+}
+
+variable "vsocket_primary_name" {
+  description = "Optional override name for the primary vSocket"
+  type        = string
+  default     = null
+}
+
+variable "vsocket_secondary_name" {
+  description = "Optional override name for the secondary vSocket"
+  type        = string
+  default     = null
+}
+
+variable "wan_subnet_name" {
+  description = "Optional override name for the WAN subnet"
+  type        = string
+  default     = null
+}
+
+variable "lan_subnet_name" {
+  description = "Optional override name for the LAN subnet"
+  type        = string
+  default     = null
+}
+
+variable "ha_identity_name" {
+  description = "Optional override name for the Cato HA Identity"
+  type        = string
+  default     = null
+}
+
+variable "vsocket_primary_disk_name" {
+  description = "Optional override name for the primary vSocket Disk"
+  type        = string
+  default     = null
+}
+
+variable "vsocket_secondary_disk_name" {
+  description = "Optional override name for the secondary vSocket Disk"
+  type        = string
+  default     = null
 }

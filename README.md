@@ -27,17 +27,6 @@ provider "cato" {
   account_id = var.account_id
 }
 
-provider "azurerm" {
-  subscription_id = var.azure_subscription_id
-  features {}
-}
-
-provider "cato" {
-  baseurl    = var.baseurl
-  token      = var.token
-  account_id = var.account_id
-}
-
 variable "azure_subscription_id" {
   default = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
 }
@@ -57,6 +46,16 @@ module "vsocket-azure-ha-vnet-2nic" {
   location              = "West Europe"
   vnet_name             = "jr-test-vnet" # Required for both creating or using existing VNET
   resource_group_name   = "jr-test-rg"
+  # ┌───── Optional Custom Naming for Azure Resources ─────┐
+  resource_prefix_name        = null # Variable to prefix all resources
+  vsocket_primary_name        = null              
+  vsocket_secondary_name      = null                 
+  wan_subnet_name             = null                 
+  lan_subnet_name             = null                 
+  ha_identity_name            = null
+  vsocket_primary_disk_name   = null
+  vsocket_secondary_disk_name = null
+  # └──────────────────────────────────────────────────────┘
   create_resource_group = true # Set to false if you want to deploy to existing Resource Group and provide current name to resource_group_name
   create_vnet           = true
   vnet_prefix           = "10.113.0.0/16"
@@ -65,6 +64,11 @@ module "vsocket-azure-ha-vnet-2nic" {
   lan_ip_primary        = "10.113.3.135"
   lan_ip_secondary      = "10.113.3.136"
   floating_ip           = "10.113.3.137"
+   # ┌───── Optional Availability configuration ─────┐
+  vsocket_primary_zone   = "1"
+  vsocket_secondary_zone = "2"                         # You cannot use Zones and Availability sets
+  availability_set_id    = null
+  # └────────────────────────────────────────────────┘
   routed_networks = {
     "Peered-VNET-1"   = "10.100.1.0/24"
     "On-Prem-Network" = "192.168.51.0/24"
