@@ -73,3 +73,8 @@
 - **Naming Customization**: Introduced variables (`resource_prefix_name`, `vsocket_primary_name`, `vsocket_secondary_name`,`wan_subnet_name`,`lan_subnet_name`, `ha_identity_name`, `vsocket_primary_disk_name`, `vsocket_secondary_disk_name` ) for greater customisation of resource naming.
 - **Availability Zones**: Added option to configure Availability Zones.
 
+## 0.1.2 
+
+### Features 
+ - Update SiteLocation (v0.0.2)
+ - Version lock Cato provider to 0.0.30 or greater

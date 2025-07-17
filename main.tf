@@ -15,7 +15,7 @@ resource "azurerm_resource_group" "azure-rg" {
   count    = var.create_resource_group ? 1 : 0
   location = var.location
   name     = var.resource_group_name
-  tags = var.tags
+  tags     = var.tags
 }
 
 resource "azurerm_availability_set" "availability-set" {
@@ -51,7 +51,7 @@ resource "azurerm_virtual_network_dns_servers" "dns_servers" {
 
 resource "azurerm_subnet" "subnet-wan" {
   address_prefixes     = [var.subnet_range_wan]
-  name                 = local.wan_subnet_name_local 
+  name                 = local.wan_subnet_name_local
   resource_group_name  = local.resource_group_name
   virtual_network_name = var.vnet_name
   depends_on = [
@@ -173,7 +173,7 @@ resource "azurerm_network_interface" "lan-nic-secondary" {
   lifecycle {
     ignore_changes = [ip_configuration] #Ignoring Changes because the Floating IP will move based on Active Device
   }
-tags = var.tags
+  tags = var.tags
 }
 
 resource "azurerm_subnet_network_security_group_association" "wan-association" {
@@ -363,7 +363,7 @@ resource "azurerm_user_assigned_identity" "CatoHaIdentity" {
   resource_group_name = local.resource_group_name
   location            = var.location
   name                = local.ha_identity_name_local
-  tags = var.tags
+  tags                = var.tags
   depends_on = [
     azurerm_resource_group.azure-rg
   ]
@@ -641,17 +641,17 @@ resource "terraform_data" "run_command_ha_secondary" {
   provisioner "local-exec" {
     # This command is also generated from its own template file.
     command = templatefile("${path.module}/templates/run_command_ha_secondary.tftpl", {
-      resource_group_name     = data.azurerm_resource_group.data-azure-rg.name
-      vsocket_secondary_name  = local.vsocket_secondary_name_local
-      location                = var.location
-      subscription_id         = var.azure_subscription_id
-      vnet_name               = var.vnet_name
-      subnet_name             = azurerm_subnet.subnet-lan.name
-      primary_nic_name        = azurerm_network_interface.lan-nic-primary.name
-      secondary_nic_name      = azurerm_network_interface.lan-nic-secondary.name
-      secondary_nic_ip        = azurerm_network_interface.lan-nic-secondary.private_ip_address
-      secondary_nic_mac       = azurerm_network_interface.lan-nic-secondary.mac_address
-      subnet_range_lan        = var.subnet_range_lan
+      resource_group_name    = data.azurerm_resource_group.data-azure-rg.name
+      vsocket_secondary_name = local.vsocket_secondary_name_local
+      location               = var.location
+      subscription_id        = var.azure_subscription_id
+      vnet_name              = var.vnet_name
+      subnet_name            = azurerm_subnet.subnet-lan.name
+      primary_nic_name       = azurerm_network_interface.lan-nic-primary.name
+      secondary_nic_name     = azurerm_network_interface.lan-nic-secondary.name
+      secondary_nic_ip       = azurerm_network_interface.lan-nic-secondary.private_ip_address
+      secondary_nic_mac      = azurerm_network_interface.lan-nic-secondary.mac_address
+      subnet_range_lan       = var.subnet_range_lan
     })
   }
 

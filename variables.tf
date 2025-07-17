@@ -281,22 +281,22 @@ variable "enable_boot_diagnostics" {
   default     = true
 }
 
-variable "tags" { 
+variable "tags" {
   description = "A Map of Strings to describe infrastructure"
-  type = map(string)
-  default = {}
+  type        = map(string)
+  default     = {}
 }
 
 variable "vsocket_primary_zone" {
   description = "Primary vsocket Availability Zone"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "vsocket_secondary_zone" {
   description = "Secondary vsocket Availability Zone"
-  type = string
-  default = null
+  type        = string
+  default     = null
 }
 
 variable "vsocket_primary_name" {
