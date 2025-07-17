@@ -1,8 +1,5 @@
 
-# Only run this data block if var.site_location is null
-# (Terraform does not support dynamic data blocks, so we use count)
 data "cato_siteLocation" "site_location" {
-  count = local.all_location_fields_null ? 1 : 0
   filters = concat([
     {
       field     = "city"
@@ -15,6 +12,7 @@ data "cato_siteLocation" "site_location" {
       search    = local.region_to_location[local.locationstr].country
     }
     ],
+    # Conditionally add state filter only if state exists
     local.region_to_location[local.locationstr].state != null ? [
       {
         field     = "state_name"
@@ -25,24 +23,8 @@ data "cato_siteLocation" "site_location" {
 }
 
 locals {
-  ## Check for all site_location inputs to be null
-  all_location_fields_null = (
-    var.site_location.city == null &&
-    var.site_location.country_code == null &&
-    var.site_location.state_code == null &&
-    var.site_location.timezone == null
-  ) ? true : false
-
-  ## If all site_location fields are null, use the data source to fetch the 
-  ## site_location from azure provuder location, else use var.site_location
-  cur_site_location = local.all_location_fields_null ? {
-    country_code = data.cato_siteLocation.site_location[0].locations[0].country_code
-    timezone     = data.cato_siteLocation.site_location[0].locations[0].timezone[0]
-    state_code   = data.cato_siteLocation.site_location[0].locations[0].state_code
-    city         = data.cato_siteLocation.site_location[0].locations[0].city
-  } : var.site_location
-
-  locationstr = lower(replace(var.location, " ", ""))
+  cur_site_location = var.site_location != null ? var.site_location : data.cato_siteLocation.site_location[0]
+  locationstr       = lower(replace(var.location, " ", ""))
   # Manual mapping of Azure regions to their cities and countries
   # Since Azure doesn't provide city/country in the API, we create our own mapping
   region_to_location = {
@@ -59,7 +41,7 @@ locals {
 
     # North America - Canada
     "canadacentral" = { city = "Toronto", state = null, country = "Canada", continent = "North America", timezone = "UTC-5" }
-    "canadaeast"    = { city = "Montr\u00c3\u00a9al", state = null, country = "Canada", continent = "North America", timezone = "UTC-5" }
+    "canadaeast"    = { city = "Montréal", state = null, country = "Canada", continent = "North America", timezone = "UTC-5" }
 
     # Europe - Countries without states/provinces use null
     "northeurope"        = { city = "Dublin", state = null, country = "Ireland", continent = "Europe", timezone = "UTC+0" }
@@ -70,12 +52,11 @@ locals {
     "germanynorth"       = { city = "Berlin", state = null, country = "Germany", continent = "Europe", timezone = "UTC+1" }
     "norwayeast"         = { city = "Oslo", state = null, country = "Norway", continent = "Europe", timezone = "UTC+1" }
     "norwaywest"         = { city = "Stavanger", state = null, country = "Norway", continent = "Europe", timezone = "UTC+1" }
-    "swedencentral"      = { city = "G\u00c3\u00a4vle", state = null, country = "Sweden", continent = "Europe", timezone = "UTC+1" }
-    "switzerlandnorth"   = { city = "Z\u00c3\u00bcrich", state = null, country = "Switzerland", continent = "Europe", timezone = "UTC+1" }
-    "switzerlandwest"    = { city = "Gen\u00c3\u00a8ve", state = null, country = "Switzerland", continent = "Europe", timezone = "UTC+1" }
+    "swedencentral"      = { city = "Gävle", state = null, country = "Sweden", continent = "Europe", timezone = "UTC+1" }
+    "switzerlandnorth"   = { city = "Zürich", state = null, country = "Switzerland", continent = "Europe", timezone = "UTC+1" }
+    "switzerlandwest"    = { city = "Genève", state = null, country = "Switzerland", continent = "Europe", timezone = "UTC+1" }
     "uksouth"            = { city = "London", state = null, country = "United Kingdom", continent = "Europe", timezone = "UTC+0" }
     "ukwest"             = { city = "Cardiff", state = null, country = "United Kingdom", continent = "Europe", timezone = "UTC+0" }
-    "polandcentral"      = { city = "Warsaw", state = null, country = "Poland", continent = "Europe", timezone = "UTC+1" }
 
     # Asia Pacific
     "eastasia"        = { city = "Hong Kong", state = null, country = "Hong Kong", continent = "Asia Pacific", timezone = "UTC+8" }
@@ -106,6 +87,10 @@ locals {
     "southafricawest"  = { city = "Cape Town", state = null, country = "South Africa", continent = "Africa", timezone = "UTC+2" }
 
     # South America
-    "brazilsouth" = { city = "S\u00c3\u00a3o Paulo", state = "S\u00c3\u00a3o Paulo", country = "Brazil", continent = "South America", timezone = "UTC-3" }
+    "brazilsouth" = { city = "São Paulo", state = "São Paulo", country = "Brazil", continent = "South America", timezone = "UTC-3" }
   }
+}
+
+output "site_location" {
+  value = data.cato_siteLocation.site_location
 }

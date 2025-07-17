@@ -114,14 +114,14 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.4 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.0.34 |
-| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.27 |
+| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.30 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.0.34 |
-| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.27 |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.30 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
@@ -209,13 +209,16 @@ No modules.
 | <a name="input_downstream_bandwidth"></a> [downstream\_bandwidth](#input\_downstream\_bandwidth) | Sockets downstream interface WAN Bandwidth in Mbps | `string` | `"null"` | no |
 | <a name="input_enable_boot_diagnostics"></a> [enable\_boot\_diagnostics](#input\_enable\_boot\_diagnostics) | If true, enables boot diagnostics with a managed storage account. If false, disables it. | `bool` | `true` | no |
 | <a name="input_floating_ip"></a> [floating\_ip](#input\_floating\_ip) | Floating IP Address for the vSocket | `string` | `null` | no |
+| <a name="input_ha_identity_name"></a> [ha\_identity\_name](#input\_ha\_identity\_name) | Optional override name for the Cato HA Identity | `string` | `null` | no |
 | <a name="input_lan_ip_primary"></a> [lan\_ip\_primary](#input\_lan\_ip\_primary) | Local IP Address of socket LAN interface | `string` | `null` | no |
 | <a name="input_lan_ip_secondary"></a> [lan\_ip\_secondary](#input\_lan\_ip\_secondary) | Local IP Address of socket LAN interface | `string` | `null` | no |
+| <a name="input_lan_subnet_name"></a> [lan\_subnet\_name](#input\_lan\_subnet\_name) | Optional override name for the LAN subnet | `string` | `null` | no |
 | <a name="input_license_bw"></a> [license\_bw](#input\_license\_bw) | The license bandwidth number for the cato site, specifying bandwidth ONLY applies for pooled licenses.  For a standard site license that is not pooled, leave this value null. Must be a number greater than 0 and an increment of 10. | `string` | `null` | no |
 | <a name="input_license_id"></a> [license\_id](#input\_license\_id) | The license ID for the Cato vSocket of license type CATO\_SITE, CATO\_SSE\_SITE, CATO\_PB, CATO\_PB\_SSE.  Example License ID value: 'abcde123-abcd-1234-abcd-abcde1234567'.  Note that licenses are for commercial accounts, and not supported for trial accounts. | `string` | `null` | no |
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `null` | no |
 | <a name="input_native_network_range"></a> [native\_network\_range](#input\_native\_network\_range) | Cato Native Network Range for the Site | `string` | `null` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Resource group name required if you want to deploy into existing Resource group | `string` | n/a | yes |
+| <a name="input_resource_prefix_name"></a> [resource\_prefix\_name](#input\_resource\_prefix\_name) | Prefix used for Azure resource names. Must conform to Azure naming restrictions. | `string` | n/a | yes |
 | <a name="input_routed_networks"></a> [routed\_networks](#input\_routed\_networks) | A map of routed networks to be accessed behind the vSocket site. The key is the network name and the value is the CIDR range.<br/>  Example: <br/>  routed\_networks = {<br/>  "Peered-VNET-1" = "10.100.1.0/24"<br/>  "On-Prem-Network" = "192.168.50.0/24"<br/>  "Management-Subnet" = "10.100.2.0/25"<br/>  } | `map(string)` | `{}` | no |
 | <a name="input_routed_ranges_gateway"></a> [routed\_ranges\_gateway](#input\_routed\_ranges\_gateway) | Routed ranges gateway. If null, the first IP of the LAN subnet will be used. | `string` | `null` | no |
 | <a name="input_site_description"></a> [site\_description](#input\_site\_description) | Description of the vsocket site | `string` | n/a | yes |
@@ -232,6 +235,13 @@ No modules.
 | <a name="input_vm_size"></a> [vm\_size](#input\_vm\_size) | (Required) Specifies the size of the Virtual Machine. See Azure VM Naming Conventions: https://learn.microsoft.com/en-us/azure/virtual-machines/vm-naming-conventions | `string` | `"Standard_D2s_v5"` | no |
 | <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | VNET Name required if you want to deploy into existing VNET | `string` | n/a | yes |
 | <a name="input_vnet_prefix"></a> [vnet\_prefix](#input\_vnet\_prefix) | Choose a unique range for your new VPC that does not conflict with the rest of your Wide Area Network.<br/>    The accepted input format is Standard CIDR Notation, e.g. X.X.X.X/X | `string` | `null` | no |
+| <a name="input_vsocket_primary_disk_name"></a> [vsocket\_primary\_disk\_name](#input\_vsocket\_primary\_disk\_name) | Optional override name for the primary vSocket Disk | `string` | `null` | no |
+| <a name="input_vsocket_primary_name"></a> [vsocket\_primary\_name](#input\_vsocket\_primary\_name) | Optional override name for the primary vSocket | `string` | `null` | no |
+| <a name="input_vsocket_primary_zone"></a> [vsocket\_primary\_zone](#input\_vsocket\_primary\_zone) | Primary vsocket Availability Zone | `string` | `null` | no |
+| <a name="input_vsocket_secondary_disk_name"></a> [vsocket\_secondary\_disk\_name](#input\_vsocket\_secondary\_disk\_name) | Optional override name for the secondary vSocket Disk | `string` | `null` | no |
+| <a name="input_vsocket_secondary_name"></a> [vsocket\_secondary\_name](#input\_vsocket\_secondary\_name) | Optional override name for the secondary vSocket | `string` | `null` | no |
+| <a name="input_vsocket_secondary_zone"></a> [vsocket\_secondary\_zone](#input\_vsocket\_secondary\_zone) | Secondary vsocket Availability Zone | `string` | `null` | no |
+| <a name="input_wan_subnet_name"></a> [wan\_subnet\_name](#input\_wan\_subnet\_name) | Optional override name for the WAN subnet | `string` | `null` | no |
 
 ## Outputs
 
@@ -257,6 +267,7 @@ No modules.
 | <a name="output_lan_subnet_role_assignment_id"></a> [lan\_subnet\_role\_assignment\_id](#output\_lan\_subnet\_role\_assignment\_id) | Role Assignment ID for the LAN Subnet |
 | <a name="output_primary_nic_role_assignment_id"></a> [primary\_nic\_role\_assignment\_id](#output\_primary\_nic\_role\_assignment\_id) | Role Assignment ID for the Primary NIC |
 | <a name="output_secondary_nic_role_assignment_id"></a> [secondary\_nic\_role\_assignment\_id](#output\_secondary\_nic\_role\_assignment\_id) | Role Assignment ID for the Secondary NIC |
+| <a name="output_site_location"></a> [site\_location](#output\_site\_location) | n/a |
 | <a name="output_vsocket_primary_reboot_status"></a> [vsocket\_primary\_reboot\_status](#output\_vsocket\_primary\_reboot\_status) | Status of the Primary vSocket VM Reboot |
 | <a name="output_vsocket_primary_vm_id"></a> [vsocket\_primary\_vm\_id](#output\_vsocket\_primary\_vm\_id) | ID of the Primary vSocket Virtual Machine |
 | <a name="output_vsocket_primary_vm_name"></a> [vsocket\_primary\_vm\_name](#output\_vsocket\_primary\_vm\_name) | Name of the Primary vSocket Virtual Machine |
