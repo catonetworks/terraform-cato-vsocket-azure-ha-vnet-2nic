@@ -78,3 +78,8 @@
 ### Features 
  - Update SiteLocation (v0.0.2)
  - Version lock Cato provider to 0.0.30 or greater
+
+ ## 0.1.3 
+
+ ## Features 
+ - fix Malformed siteLocation.tf

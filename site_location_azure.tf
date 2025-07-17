@@ -1,5 +1,6 @@
 
 data "cato_siteLocation" "site_location" {
+  count = local.all_location_fields_null ? 1 : 0
   filters = concat([
     {
       field     = "city"
@@ -12,7 +13,6 @@ data "cato_siteLocation" "site_location" {
       search    = local.region_to_location[local.locationstr].country
     }
     ],
-    # Conditionally add state filter only if state exists
     local.region_to_location[local.locationstr].state != null ? [
       {
         field     = "state_name"
@@ -23,8 +23,24 @@ data "cato_siteLocation" "site_location" {
 }
 
 locals {
-  cur_site_location = var.site_location != null ? var.site_location : data.cato_siteLocation.site_location[0]
-  locationstr       = lower(replace(var.location, " ", ""))
+ ## Check for all site_location inputs to be null
+  all_location_fields_null = (
+    var.site_location.city == null &&
+    var.site_location.country_code == null &&
+    var.site_location.state_code == null &&
+    var.site_location.timezone == null
+  ) ? true : false
+
+  ## If all site_location fields are null, use the data source to fetch the 
+  ## site_location from azure provuder location, else use var.site_location
+  cur_site_location = local.all_location_fields_null ? {
+    country_code = data.cato_siteLocation.site_location[0].locations[0].country_code
+    timezone     = data.cato_siteLocation.site_location[0].locations[0].timezone[0]
+    state_code   = data.cato_siteLocation.site_location[0].locations[0].state_code
+    city         = data.cato_siteLocation.site_location[0].locations[0].city
+  } : var.site_location
+
+  locationstr = lower(replace(var.location, " ", ""))
   # Manual mapping of Azure regions to their cities and countries
   # Since Azure doesn't provide city/country in the API, we create our own mapping
   region_to_location = {
