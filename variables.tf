@@ -69,17 +69,21 @@ variable "resource_group_name" {
 variable "resource_prefix_name" {
   description = "Prefix used for Azure resource names. Must conform to Azure naming restrictions."
   type        = string
+  default     = null
 
   validation {
     condition = (
-      # Not starting with underscore
-      can(regex("^[^_]", var.resource_prefix_name)) &&
-      # Not ending with dot or hyphen
-      can(regex("[^.-]$", var.resource_prefix_name)) &&
-      # Allowed characters only: a-zA-Z0-9 . _ -
-      can(regex("^[a-zA-Z0-9._-]+$", var.resource_prefix_name)) &&
-      # No forbidden special characters or whitespace
-      !can(regex("[\\s\\\\/\"\\[\\]:|<>+=;,\\?*@&#%]", var.resource_prefix_name))
+      # Allow null values to pass validation
+      var.resource_prefix_name == null || (
+        # Not starting with underscore
+        can(regex("^[^_]", var.resource_prefix_name)) &&
+        # Not ending with dot or hyphen
+        can(regex("[^.-]$", var.resource_prefix_name)) &&
+        # Allowed characters only: a-zA-Z0-9 . _ -
+        can(regex("^[a-zA-Z0-9._-]+$", var.resource_prefix_name)) &&
+        # No forbidden special characters or whitespace
+        !can(regex("[\\s\\\\/\"\\[\\]:|<>+=;,\\?*@&#%]", var.resource_prefix_name))
+      )
     )
     error_message = <<EOT
 Invalid resource_prefix_name.
@@ -94,7 +98,6 @@ Example of a valid name: "app_prefix-01.cato"
 EOT
   }
 }
-
 variable "vnet_name" {
   description = "VNET Name required if you want to deploy into existing VNET"
   type        = string

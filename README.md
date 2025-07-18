@@ -44,8 +44,8 @@ module "vsocket-azure-ha-vnet-2nic" {
   azure_subscription_id = var.azure_subscription_id
   baseurl               = var.baseurl
   location              = "West Europe"
-  vnet_name             = "jr-test-vnet" # Required for both creating or using existing VNET
-  resource_group_name   = "jr-test-rg"
+  vnet_name             = "test-vnet" # Required for both creating or using existing VNET
+  resource_group_name   = "test-rg"
   # ┌───── Optional Custom Naming for Azure Resources ─────┐
   resource_prefix_name        = null # Variable to prefix all resources
   vsocket_primary_name        = null              
