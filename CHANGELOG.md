@@ -83,3 +83,11 @@
 
  ## Features 
  - fix Malformed siteLocation.tf
+
+ ## 0.1.4
+
+ ### Features 
+ - fix resource-prefix-name variable to make nullable 
+ - add additional logic for resource naming 
+ - Update Sitelocation with Poland 
+ - Update SiteLocation with Zurich Fix
