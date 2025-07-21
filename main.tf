@@ -739,7 +739,7 @@ resource "cato_network_range" "routedAzure" {
   
   # Access attributes from the value object
   subnet            = each.value.subnet
-  translated_subnet = each.value.translated_subnet == null ? each.value.subnet : each.value.translated_subnet
+  translated_subnet = var.enable_static_range_translation ? coalesce(each.value.translated_subnet, each.value.subnet) : null
   # This will be null if not defined, and the provider will ignore it.
 }
 

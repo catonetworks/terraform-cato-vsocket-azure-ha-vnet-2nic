@@ -92,3 +92,4 @@
  - Update Sitelocation with Poland 
  - Update SiteLocation with Zurich Fix
  - Update Routed-Networks to Support SRT and NAT Range
+ - Update Documentation (Notes) to describe Static Range Translation Requirements

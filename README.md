@@ -70,13 +70,14 @@ module "vsocket-azure-ha-vnet-2nic" {
   vsocket_secondary_zone = "2"                         # You cannot use Zones and Availability sets
   availability_set_id    = null
   # └────────────────────────────────────────────────┘
+   enable_static_range_translation = false #set to true if the Account settings has been updated.
    routed_networks = {
     "Peered-VNET-1" = {
       subnet = "10.100.1.0/24"
     }
     "On-Prem-Network-With-NAT" = {
       subnet            = "192.168.51.0/24"
-      translated_subnet = "10.250.1.0/24" # Example translated range, SRT Required - See Notes.
+      translated_subnet = "10.250.1.0/24" # Example translated range, SRT Required, set enable_static_range_translation = true
     }
   }
   upstream_bandwidth   = 1000

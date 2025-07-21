@@ -355,3 +355,9 @@ variable "vsocket_secondary_disk_name" {
   type        = string
   default     = null
 }
+
+variable "enable_static_range_translation" { 
+  description = "Enables the ability to use translated ranges"
+  type = string 
+  default = false
+}
