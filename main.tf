@@ -20,7 +20,7 @@ resource "azurerm_resource_group" "azure-rg" {
 
 resource "azurerm_availability_set" "availability-set" {
   location                     = var.location
-  name                         = "${var.resource_prefix_name}-availabilitySet"
+  name                         = "${local.resource_name_prefix}-availabilitySet"
   platform_fault_domain_count  = 2
   platform_update_domain_count = 2
   resource_group_name          = local.resource_group_name
@@ -35,7 +35,7 @@ resource "azurerm_virtual_network" "vnet" {
   count         = var.create_vnet ? 1 : 0
   address_space = [var.vnet_prefix]
   location      = var.location
-  name          = var.vnet_name == null ? "${var.resource_prefix_name}-vnet" : var.vnet_name
+  name          = var.vnet_name == null ? "${local.resource_name_prefix}-vnet" : var.vnet_name
 
   resource_group_name = local.resource_group_name
   depends_on = [
@@ -72,7 +72,7 @@ resource "azurerm_subnet" "subnet-lan" {
 resource "azurerm_public_ip" "wan-public-ip-primary" {
   allocation_method   = "Static"
   location            = var.location
-  name                = "${var.resource_prefix_name}-wanPublicIPPrimary"
+  name                = "${local.resource_name_prefix}-wanPublicIPPrimary"
   resource_group_name = local.resource_group_name
   sku                 = "Standard"
   depends_on = [
@@ -84,7 +84,7 @@ resource "azurerm_public_ip" "wan-public-ip-primary" {
 resource "azurerm_public_ip" "wan-public-ip-secondary" {
   allocation_method   = "Static"
   location            = var.location
-  name                = "${var.resource_prefix_name}-wanPublicIPSecondary"
+  name                = "${local.resource_name_prefix}-wanPublicIPSecondary"
   resource_group_name = local.resource_group_name
   sku                 = "Standard"
   depends_on = [
@@ -98,10 +98,10 @@ resource "azurerm_network_interface" "wan-nic-primary" {
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = true
   location                       = var.location
-  name                           = "${var.resource_prefix_name}-wanPrimary"
+  name                           = "${local.resource_name_prefix}-wanPrimary"
   resource_group_name            = local.resource_group_name
   ip_configuration {
-    name                          = "${var.resource_prefix_name}-wanIPPrimary"
+    name                          = "${local.resource_name_prefix}-wanIPPrimary"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.wan-public-ip-primary.id
     subnet_id                     = azurerm_subnet.subnet-wan.id
@@ -118,10 +118,10 @@ resource "azurerm_network_interface" "lan-nic-primary" {
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = true
   location                       = var.location
-  name                           = "${var.resource_prefix_name}-lanPrimary"
+  name                           = "${local.resource_name_prefix}-lanPrimary"
   resource_group_name            = local.resource_group_name
   ip_configuration {
-    name                          = "${var.resource_prefix_name}-lanIPConfigPrimary"
+    name                          = "${local.resource_name_prefix}-lanIPConfigPrimary"
     private_ip_address_allocation = "Static"
     private_ip_address            = var.lan_ip_primary
     subnet_id                     = azurerm_subnet.subnet-lan.id
@@ -139,10 +139,10 @@ resource "azurerm_network_interface" "wan-nic-secondary" {
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = true
   location                       = var.location
-  name                           = "${var.resource_prefix_name}-wanSecondary"
+  name                           = "${local.resource_name_prefix}-wanSecondary"
   resource_group_name            = local.resource_group_name
   ip_configuration {
-    name                          = "${var.resource_prefix_name}-wanIPSecondary"
+    name                          = "${local.resource_name_prefix}-wanIPSecondary"
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.wan-public-ip-secondary.id
     subnet_id                     = azurerm_subnet.subnet-wan.id
@@ -158,10 +158,10 @@ resource "azurerm_network_interface" "lan-nic-secondary" {
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = true
   location                       = var.location
-  name                           = "${var.resource_prefix_name}-lanSecondary"
+  name                           = "${local.resource_name_prefix}-lanSecondary"
   resource_group_name            = local.resource_group_name
   ip_configuration {
-    name                          = "${var.resource_prefix_name}-lanIPConfigSecondary"
+    name                          = "${local.resource_name_prefix}-lanIPConfigSecondary"
     private_ip_address_allocation = "Static"
     private_ip_address            = var.lan_ip_secondary
     subnet_id                     = azurerm_subnet.subnet-lan.id
@@ -189,7 +189,7 @@ resource "azurerm_subnet_network_security_group_association" "lan-association" {
 # Create Security Groups
 resource "azurerm_network_security_group" "wan-sg" {
   location            = var.location
-  name                = "${var.resource_prefix_name}-WANSecurityGroup"
+  name                = "${local.resource_name_prefix}-WANSecurityGroup"
   resource_group_name = local.resource_group_name
 
   security_rule {
@@ -261,7 +261,7 @@ resource "azurerm_network_security_group" "wan-sg" {
 
 resource "azurerm_network_security_group" "lan-sg" {
   location            = var.location
-  name                = "${var.resource_prefix_name}-LANSecurityGroup"
+  name                = "${local.resource_name_prefix}-LANSecurityGroup"
   resource_group_name = local.resource_group_name
   depends_on = [
     azurerm_resource_group.azure-rg
@@ -273,7 +273,7 @@ resource "azurerm_network_security_group" "lan-sg" {
 resource "azurerm_route_table" "private-rt" {
   bgp_route_propagation_enabled = false
   location                      = var.location
-  name                          = "${var.resource_prefix_name}-viaCato"
+  name                          = "${local.resource_name_prefix}-viaCato"
   resource_group_name           = local.resource_group_name
   depends_on = [
     azurerm_resource_group.azure-rg
@@ -286,7 +286,7 @@ resource "azurerm_route" "public-rt" {
   name                = "Microsoft-KMS"
   next_hop_type       = "Internet"
   resource_group_name = local.resource_group_name
-  route_table_name    = "${var.resource_prefix_name}-viaCato"
+  route_table_name    = "${local.resource_name_prefix}-viaCato"
   depends_on = [
     azurerm_route_table.private-rt
   ]
@@ -298,7 +298,7 @@ resource "azurerm_route" "lan-route" {
   next_hop_in_ip_address = var.floating_ip
   next_hop_type          = "VirtualAppliance"
   resource_group_name    = local.resource_group_name
-  route_table_name       = "${var.resource_prefix_name}-viaCato"
+  route_table_name       = "${local.resource_name_prefix}-viaCato"
   depends_on = [
     azurerm_route_table.private-rt
   ]
@@ -307,7 +307,7 @@ resource "azurerm_route" "lan-route" {
 resource "azurerm_route_table" "public-rt" {
   bgp_route_propagation_enabled = false
   location                      = var.location
-  name                          = "${var.resource_prefix_name}-viaInternet"
+  name                          = "${local.resource_name_prefix}-viaInternet"
   resource_group_name           = local.resource_group_name
   depends_on = [
     azurerm_resource_group.azure-rg
@@ -320,7 +320,7 @@ resource "azurerm_route" "route-internet" {
   name                = "default-internet"
   next_hop_type       = "Internet"
   resource_group_name = local.resource_group_name
-  route_table_name    = "${var.resource_prefix_name}-viaInternet"
+  route_table_name    = "${local.resource_name_prefix}-viaInternet"
   depends_on = [
     azurerm_route_table.public-rt
   ]
@@ -440,13 +440,13 @@ resource "time_sleep" "sleep_5_seconds" {
 }
 
 data "azurerm_network_interface" "wannicmac" {
-  name                = "${var.resource_prefix_name}-wanPrimary"
+  name                = "${local.resource_name_prefix}-wanPrimary"
   resource_group_name = local.resource_group_name
   depends_on          = [time_sleep.sleep_5_seconds]
 }
 
 data "azurerm_network_interface" "lannicmac" {
-  name                = "${var.resource_prefix_name}-lanPrimary"
+  name                = "${local.resource_name_prefix}-lanPrimary"
   resource_group_name = local.resource_group_name
   depends_on          = [time_sleep.sleep_5_seconds]
 }
@@ -733,10 +733,14 @@ resource "time_sleep" "sleep_before_delete" {
 resource "cato_network_range" "routedAzure" {
   for_each   = var.routed_networks
   site_id    = cato_socket_site.azure-site.id
-  name       = each.key # The name is the key from the map item.
+  name       = each.key
   range_type = "Routed"
   gateway    = var.routed_ranges_gateway == null ? local.lan_first_ip : var.routed_ranges_gateway
-  subnet     = each.value # The subnet is the value from the map item.
+  
+  # Access attributes from the value object
+  subnet            = each.value.subnet
+  translated_subnet = var.enable_static_range_translation ? coalesce(each.value.translated_subnet, each.value.subnet) : null
+  # This will be null if not defined, and the provider will ignore it.
 }
 
 # Update socket Bandwidth

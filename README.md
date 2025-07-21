@@ -11,6 +11,7 @@ Cato recommends setting the value to 1. Example call: terraform apply -paralleli
 - This module will look up the Cato Site Location information based on the Location of Azure specified.  If you would like to override this behavior, please leverage the below for help finding the correct values.
 - For help with finding exact sytax to match site location for city, state_name, country_name and timezone, please refer to the [cato_siteLocation data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/siteLocation).
 - For help with finding a license id to assign, please refer to the [cato_licensingInfo data source](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/licensingInfo).
+- For Translated Ranges, "Enable Static Range Translation" but be enabled for more information please refer to [Configuring System Settings for the Account](https://support.catonetworks.com/hc/en-us/articles/4413280536849-Configuring-System-Settings-for-the-Account)
 
 
 ## Usage
@@ -44,8 +45,8 @@ module "vsocket-azure-ha-vnet-2nic" {
   azure_subscription_id = var.azure_subscription_id
   baseurl               = var.baseurl
   location              = "West Europe"
-  vnet_name             = "jr-test-vnet" # Required for both creating or using existing VNET
-  resource_group_name   = "jr-test-rg"
+  vnet_name             = "test-vnet" # Required for both creating or using existing VNET
+  resource_group_name   = "test-rg"
   # ┌───── Optional Custom Naming for Azure Resources ─────┐
   resource_prefix_name        = null # Variable to prefix all resources
   vsocket_primary_name        = null              
@@ -69,9 +70,15 @@ module "vsocket-azure-ha-vnet-2nic" {
   vsocket_secondary_zone = "2"                         # You cannot use Zones and Availability sets
   availability_set_id    = null
   # └────────────────────────────────────────────────┘
-  routed_networks = {
-    "Peered-VNET-1"   = "10.100.1.0/24"
-    "On-Prem-Network" = "192.168.51.0/24"
+   enable_static_range_translation = false #set to true if the Account settings has been updated.
+   routed_networks = {
+    "Peered-VNET-1" = {
+      subnet = "10.100.1.0/24"
+    }
+    "On-Prem-Network-With-NAT" = {
+      subnet            = "192.168.51.0/24"
+      translated_subnet = "10.250.1.0/24" # Example translated range, SRT Required, set enable_static_range_translation = true
+    }
   }
   upstream_bandwidth   = 1000
   downstream_bandwidth = 1000
