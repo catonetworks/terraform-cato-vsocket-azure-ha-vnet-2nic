@@ -91,3 +91,4 @@
  - add additional logic for resource naming 
  - Update Sitelocation with Poland 
  - Update SiteLocation with Zurich Fix
+ - Update Routed-Networks to Support SRT and NAT Range

@@ -175,16 +175,28 @@ variable "vnet_prefix" {
 
 variable "routed_networks" {
   description = <<EOF
-  A map of routed networks to be accessed behind the vSocket site. The key is the network name and the value is the CIDR range.
+  A map of routed networks to be accessed behind the vSocket site.
+  - The key is the logical name for the network.
+  - The value is an object containing:
+    - "subnet" (string, required): The actual CIDR range of the network.
+    - "translated_subnet" (string, optional): The NATed CIDR range if translation is used.
+
   Example: 
   routed_networks = {
-  "Peered-VNET-1" = "10.100.1.0/24"
-  "On-Prem-Network" = "192.168.50.0/24"
-  "Management-Subnet" = "10.100.2.0/25"
+    "Peered-VNET-1" = {
+      subnet = "10.100.1.0/24"
+    }
+    "On-Prem-Network-NAT" = {
+      subnet            = "192.168.51.0/24"
+      translated_subnet = "10.200.1.0/24"
+    }
   }
   EOF
-  type        = map(string)
-  default     = {} # Default to an empty map instead of null.
+  type = map(object({
+    subnet            = string
+    translated_subnet = optional(string)
+  }))
+  default = {}
 }
 
 # This variable remains the same as it applies to all networks.

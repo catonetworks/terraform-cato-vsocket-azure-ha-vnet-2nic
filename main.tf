@@ -733,10 +733,14 @@ resource "time_sleep" "sleep_before_delete" {
 resource "cato_network_range" "routedAzure" {
   for_each   = var.routed_networks
   site_id    = cato_socket_site.azure-site.id
-  name       = each.key # The name is the key from the map item.
+  name       = each.key
   range_type = "Routed"
   gateway    = var.routed_ranges_gateway == null ? local.lan_first_ip : var.routed_ranges_gateway
-  subnet     = each.value # The subnet is the value from the map item.
+  
+  # Access attributes from the value object
+  subnet            = each.value.subnet
+  translated_subnet = each.value.translated_subnet == null ? each.value.subnet : each.value.translated_subnet
+  # This will be null if not defined, and the provider will ignore it.
 }
 
 # Update socket Bandwidth
