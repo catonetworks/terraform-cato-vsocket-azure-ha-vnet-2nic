@@ -172,6 +172,11 @@ variable "vnet_prefix" {
   default     = null
 }
 
+variable "enable_static_range_translation" {
+  description = "Enables the ability to use translated ranges"
+  type        = string
+  default     = false
+}
 
 variable "routed_networks" {
   description = <<EOF
@@ -180,7 +185,6 @@ variable "routed_networks" {
   - The value is an object containing:
     - "subnet" (string, required): The actual CIDR range of the network.
     - "translated_subnet" (string, optional): The NATed CIDR range if translation is used.
-
   Example: 
   routed_networks = {
     "Peered-VNET-1" = {
@@ -195,15 +199,10 @@ variable "routed_networks" {
   type = map(object({
     subnet            = string
     translated_subnet = optional(string)
+    gateway           = optional(string)
+    interface_index   = optional(string, "LAN1")
   }))
   default = {}
-}
-
-# This variable remains the same as it applies to all networks.
-variable "routed_ranges_gateway" {
-  description = "Routed ranges gateway. If null, the first IP of the LAN subnet will be used."
-  type        = string
-  default     = null
 }
 
 variable "vm_size" {
@@ -356,8 +355,8 @@ variable "vsocket_secondary_disk_name" {
   default     = null
 }
 
-variable "enable_static_range_translation" { 
+variable "enable_static_range_translation" {
   description = "Enables the ability to use translated ranges"
-  type = string 
-  default = false
+  type        = string
+  default     = false
 }

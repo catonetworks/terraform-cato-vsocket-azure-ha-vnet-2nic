@@ -70,16 +70,21 @@ module "vsocket-azure-ha-vnet-2nic" {
   vsocket_secondary_zone = "2"                         # You cannot use Zones and Availability sets
   availability_set_id    = null
   # └────────────────────────────────────────────────┘
-   enable_static_range_translation = false #set to true if the Account settings has been updated.
-   routed_networks = {
+   
+  enable_static_range_translation = false #set to true if the Account settings has been updated.
+  routed_networks = {
     "Peered-VNET-1" = {
       subnet = "10.100.1.0/24"
+      # interface_index is omitted, so it will default to "LAN1".
     }
     "On-Prem-Network-With-NAT" = {
       subnet            = "192.168.51.0/24"
-      translated_subnet = "10.250.1.0/24" # Example translated range, SRT Required, set enable_static_range_translation = true
+      translated_subnet = "10.250.3.0/24" # Example translated range, SRT Required, set 
+      interface_index = "LAN2" # Overriding the default value.
+      gateway = "192.168.51.254" # Overriding the default value of LAN1 LocalIP
     }
   }
+
   upstream_bandwidth   = 1000
   downstream_bandwidth = 1000
   site_name             = "Your Site name here"
@@ -120,15 +125,15 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.4 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.0.34 |
-| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.30 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.33.0 |
+| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.38 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.0.34 |
-| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.30 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.33.0 |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.38 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
@@ -215,6 +220,7 @@ No modules.
 | <a name="input_dns_servers"></a> [dns\_servers](#input\_dns\_servers) | n/a | `list(string)` | <pre>[<br/>  "168.63.129.16",<br/>  "10.254.254.1",<br/>  "1.1.1.1",<br/>  "8.8.8.8"<br/>]</pre> | no |
 | <a name="input_downstream_bandwidth"></a> [downstream\_bandwidth](#input\_downstream\_bandwidth) | Sockets downstream interface WAN Bandwidth in Mbps | `string` | `"null"` | no |
 | <a name="input_enable_boot_diagnostics"></a> [enable\_boot\_diagnostics](#input\_enable\_boot\_diagnostics) | If true, enables boot diagnostics with a managed storage account. If false, disables it. | `bool` | `true` | no |
+| <a name="input_enable_static_range_translation"></a> [enable\_static\_range\_translation](#input\_enable\_static\_range\_translation) | Enables the ability to use translated ranges | `string` | `false` | no |
 | <a name="input_floating_ip"></a> [floating\_ip](#input\_floating\_ip) | Floating IP Address for the vSocket | `string` | `null` | no |
 | <a name="input_ha_identity_name"></a> [ha\_identity\_name](#input\_ha\_identity\_name) | Optional override name for the Cato HA Identity | `string` | `null` | no |
 | <a name="input_lan_ip_primary"></a> [lan\_ip\_primary](#input\_lan\_ip\_primary) | Local IP Address of socket LAN interface | `string` | `null` | no |
@@ -225,9 +231,8 @@ No modules.
 | <a name="input_location"></a> [location](#input\_location) | n/a | `string` | `null` | no |
 | <a name="input_native_network_range"></a> [native\_network\_range](#input\_native\_network\_range) | Cato Native Network Range for the Site | `string` | `null` | no |
 | <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Resource group name required if you want to deploy into existing Resource group | `string` | n/a | yes |
-| <a name="input_resource_prefix_name"></a> [resource\_prefix\_name](#input\_resource\_prefix\_name) | Prefix used for Azure resource names. Must conform to Azure naming restrictions. | `string` | n/a | yes |
-| <a name="input_routed_networks"></a> [routed\_networks](#input\_routed\_networks) | A map of routed networks to be accessed behind the vSocket site. The key is the network name and the value is the CIDR range.<br/>  Example: <br/>  routed\_networks = {<br/>  "Peered-VNET-1" = "10.100.1.0/24"<br/>  "On-Prem-Network" = "192.168.50.0/24"<br/>  "Management-Subnet" = "10.100.2.0/25"<br/>  } | `map(string)` | `{}` | no |
-| <a name="input_routed_ranges_gateway"></a> [routed\_ranges\_gateway](#input\_routed\_ranges\_gateway) | Routed ranges gateway. If null, the first IP of the LAN subnet will be used. | `string` | `null` | no |
+| <a name="input_resource_prefix_name"></a> [resource\_prefix\_name](#input\_resource\_prefix\_name) | Prefix used for Azure resource names. Must conform to Azure naming restrictions. | `string` | `null` | no |
+| <a name="input_routed_networks"></a> [routed\_networks](#input\_routed\_networks) | A map of routed networks to be accessed behind the vSocket site.<br/>  - The key is the logical name for the network.<br/>  - The value is an object containing:<br/>    - "subnet" (string, required): The actual CIDR range of the network.<br/>    - "translated\_subnet" (string, optional): The NATed CIDR range if translation is used.<br/>  Example: <br/>  routed\_networks = {<br/>    "Peered-VNET-1" = {<br/>      subnet = "10.100.1.0/24"<br/>    }<br/>    "On-Prem-Network-NAT" = {<br/>      subnet            = "192.168.51.0/24"<br/>      translated\_subnet = "10.200.1.0/24"<br/>    }<br/>  } | <pre>map(object({<br/>    subnet            = string<br/>    translated_subnet = optional(string)<br/>    gateway           = optional(string)<br/>    interface_index   = optional(string, "LAN1")<br/>  }))</pre> | `{}` | no |
 | <a name="input_site_description"></a> [site\_description](#input\_site\_description) | Description of the vsocket site | `string` | n/a | yes |
 | <a name="input_site_location"></a> [site\_location](#input\_site\_location) | Site location which is used by the Cato Socket to connect to the closest Cato PoP. If not specified, the location will be derived from the Azure region dynamicaly. | <pre>object({<br/>    city         = string<br/>    country_code = string<br/>    state_code   = string<br/>    timezone     = string<br/>  })</pre> | <pre>{<br/>  "city": null,<br/>  "country_code": null,<br/>  "state_code": null,<br/>  "timezone": null<br/>}</pre> | no |
 | <a name="input_site_name"></a> [site\_name](#input\_site\_name) | Name of the vsocket site | `string` | n/a | yes |

@@ -731,12 +731,12 @@ resource "time_sleep" "sleep_before_delete" {
 }
 
 resource "cato_network_range" "routedAzure" {
-  for_each   = var.routed_networks
-  site_id    = cato_socket_site.azure-site.id
-  name       = each.key
-  range_type = "Routed"
-  gateway    = var.routed_ranges_gateway == null ? local.lan_first_ip : var.routed_ranges_gateway
-  
+  for_each        = var.routed_networks
+  site_id         = cato_socket_site.azure-site.id
+  name            = each.key
+  range_type      = "Routed"
+  gateway         = lookup(each.value.gateway, local.lan_first_ip)
+  interface_index = each.value.interface_index
   # Access attributes from the value object
   subnet            = each.value.subnet
   translated_subnet = var.enable_static_range_translation ? coalesce(each.value.translated_subnet, each.value.subnet) : null
