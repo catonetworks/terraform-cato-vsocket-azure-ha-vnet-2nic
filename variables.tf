@@ -172,12 +172,6 @@ variable "vnet_prefix" {
   default     = null
 }
 
-variable "enable_static_range_translation" {
-  description = "Enables the ability to use translated ranges"
-  type        = string
-  default     = false
-}
-
 variable "routed_networks" {
   description = <<EOF
   A map of routed networks to be accessed behind the vSocket site.
