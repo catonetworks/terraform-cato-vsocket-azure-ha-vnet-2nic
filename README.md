@@ -39,7 +39,7 @@ variable "account_id" {}
 
 
 module "vsocket-azure-ha-vnet-2nic" {
-  source                = "catonetworks/terraform-cato-vsocket-azure-ha-vnet-2nic"
+  source                = "catonetworks/vsocket-azure-ha-vnet-2nic/cato"
   token                 = var.token
   account_id            = var.account_id
   azure_subscription_id = var.azure_subscription_id
