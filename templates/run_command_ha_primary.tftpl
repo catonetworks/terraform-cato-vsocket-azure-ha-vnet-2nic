@@ -2,8 +2,40 @@
 # It writes a JSON configuration file to the VM.
 # Variables like vsocket_primary_name are placeholders that Terraform will fill in.
 
-az vm run-command invoke \
+# Enable debug output
+set -x
+echo "Configuring HA settings for primary vSocket..."
+echo "Resource Group: ${resource_group_name}"
+echo "Primary vSocket Name: ${vsocket_primary_name}"
+echo "Location: ${location}"
+echo "Primary NIC Name: ${primary_nic_name}"
+echo "Secondary NIC Name: ${secondary_nic_name}"
+echo "Primary NIC IP: ${primary_nic_ip}"
+
+# Create the configuration JSON for debugging
+config_json='{"location": "${location}", "subscription_id": "${subscription_id}", "vnet": "${vnet_name}", "group": "${resource_group_name}", "vnet_group": "${resource_group_name}", "subnet": "${subnet_name}", "nic": "${primary_nic_name}", "ha_nic": "${secondary_nic_name}", "lan_nic_ip": "${primary_nic_ip}", "lan_nic_mac": "${primary_nic_mac}", "subnet_cidr": "${subnet_range_lan}", "az_mgmt_url": "management.azure.com"}'
+echo "Configuration JSON to be written:"
+echo "$config_json"
+
+# Execute the Azure CLI command with output capture
+echo "Executing Azure CLI run-command..."
+output=$(az vm run-command invoke \
   --resource-group "${resource_group_name}" \
   --name "${vsocket_primary_name}" \
   --command-id RunShellScript \
-  --scripts "echo '{\"location\": \"${location}\", \"subscription_id\": \"${subscription_id}\", \"vnet\": \"${vnet_name}\", \"group\": \"${resource_group_name}\", \"vnet_group\": \"${resource_group_name}\", \"subnet\": \"${subnet_name}\", \"nic\": \"${primary_nic_name}\", \"ha_nic\": \"${secondary_nic_name}\", \"lan_nic_ip\": \"${primary_nic_ip}\", \"lan_nic_mac\": \"${primary_nic_mac}\", \"subnet_cidr\": \"${subnet_range_lan}\", \"az_mgmt_url\": \"management.azure.com\"}' > /cato/socket/configuration/vm_config.json"
+  --scripts "echo '$config_json' > /cato/socket/configuration/vm_config.json && echo 'Configuration file written successfully' && ls -la /cato/socket/configuration/vm_config.json && echo 'File contents:' && cat /cato/socket/configuration/vm_config.json" \
+  2>&1)
+
+# Check the exit status
+exit_code=$?
+echo "Azure CLI exit code: $exit_code"
+echo "Azure CLI output:"
+echo "$output"
+
+if [ $exit_code -eq 0 ]; then
+    echo "SUCCESS: Primary vSocket HA configuration completed successfully"
+    exit 0
+else
+    echo "ERROR: Primary vSocket HA configuration failed"
+    exit $exit_code
+fi

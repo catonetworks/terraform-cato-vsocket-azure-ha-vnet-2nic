@@ -105,3 +105,21 @@
 
 ### Features
  - Update Documentation
+
+ ## 0.1.7
+
+ ### Features 
+  - Added additional naming options
+    - lan_nic_primary_name
+    - lan_nic_secondary_name
+    - lan_nic_primary_ipconfig_name
+    - lan_nic_secondary_ipconfig_name
+    - wan_nic_primary_name
+    - wan_nic_secondary_name
+    - wan_nic_primary_ipconfig_name
+    - wan_nic_secondary_ipconfig_name
+  - Added additional example within README.md
+  - Updated API Calls to export additional debug information
+  - Updated CLI Calls to export additional debug information
+  - Updated Required Terraform Version to 1.5
+  - Removed Sensitive flag for Azure Subscription ID
