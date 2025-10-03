@@ -29,7 +29,7 @@ provider "cato" {
 }
 
 variable "azure_subscription_id" {
-  default = "d21d8fbe-3b19-4c0c-86d2-b7dd4f9b93a4"
+  default = "<Your-Azure-Subscription-ID>"
 }
 
 variable "baseurl" {}
@@ -37,7 +37,7 @@ variable "token" {}
 variable "account_id" {}
 
 module "vsocket-azure-ha-vnet-2nic" {
-  source                = "../"
+  source                = "catonetworks/vsocket-azure-ha-vnet-2nic/cato"
   token                 = var.token
   account_id            = var.account_id
   azure_subscription_id = var.azure_subscription_id
