@@ -1,3 +1,25 @@
 # This template contains the command to restart the secondary VM.
 
-az vm restart --resource-group "${resource_group_name}" --name "${vsocket_secondary_name}"
+# Enable debug output
+set -x
+echo "Restarting secondary vSocket..."
+echo "Resource Group: ${resource_group_name}"
+echo "Secondary vSocket Name: ${vsocket_secondary_name}"
+
+# Execute the restart command with output capture
+echo "Executing Azure CLI restart command..."
+output=$(az vm restart --resource-group "${resource_group_name}" --name "${vsocket_secondary_name}" 2>&1)
+
+# Check the exit status
+exit_code=$?
+echo "Azure CLI exit code: $exit_code"
+echo "Azure CLI output:"
+echo "$output"
+
+if [ $exit_code -eq 0 ]; then
+    echo "SUCCESS: Secondary vSocket restart completed successfully"
+    exit 0
+else
+    echo "ERROR: Secondary vSocket restart failed"
+    exit $exit_code
+fi

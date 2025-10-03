@@ -29,71 +29,88 @@ provider "cato" {
 }
 
 variable "azure_subscription_id" {
-  default = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
+  default = "d21d8fbe-3b19-4c0c-86d2-b7dd4f9b93a4"
 }
 
 variable "baseurl" {}
 variable "token" {}
 variable "account_id" {}
 
-
-
 module "vsocket-azure-ha-vnet-2nic" {
-  source                = "catonetworks/vsocket-azure-ha-vnet-2nic/cato"
+  source                = "../"
   token                 = var.token
   account_id            = var.account_id
   azure_subscription_id = var.azure_subscription_id
   baseurl               = var.baseurl
   location              = "West Europe"
-  vnet_name             = "test-vnet" # Required for both creating or using existing VNET
-  resource_group_name   = "test-rg"
-  # ┌───── Optional Custom Naming for Azure Resources ─────┐
-  resource_prefix_name        = null # Variable to prefix all resources
-  vsocket_primary_name        = null              
-  vsocket_secondary_name      = null                 
-  wan_subnet_name             = null                 
-  lan_subnet_name             = null                 
-  ha_identity_name            = null
-  vsocket_primary_disk_name   = null
-  vsocket_secondary_disk_name = null
-  # └──────────────────────────────────────────────────────┘
+  
+ # ┌───── Required Configuration for Azure Resources ─────┐
+  resource_group_name   = "My-New-Resource-Group"
   create_resource_group = true # Set to false if you want to deploy to existing Resource Group and provide current name to resource_group_name
+  
+  vnet_name             = "My-New-VNet" # Required for both creating or using existing VNET
   create_vnet           = true
+
+  resource_prefix_name            = "my-test" # Variable to prefix all resources
+
+ # └──────────────────────────────────────────────────────┘
+
+
+
+ # ┌───── Optional Custom Naming for Azure Resources ─────┐
+  vsocket_primary_name            = null
+  vsocket_secondary_name          = null
+  wan_subnet_name                 = null
+  lan_subnet_name                 = null
+  ha_identity_name                = null
+  vsocket_primary_disk_name       = null
+  vsocket_secondary_disk_name     = null
+  lan_nic_primary_name            = "my-lan-nic-primary"
+  lan_nic_secondary_name          = "my-lan-nic-secondary"
+  lan_nic_primary_ipconfig_name   = "my-lan-ipconfig-primary"
+  lan_nic_secondary_ipconfig_name = "my-lan-ipconfig-secondary"
+  wan_nic_primary_name            = "my-wan-nic-primary"
+  wan_nic_secondary_name          = "my-wan-nic-secondary"
+  wan_nic_primary_ipconfig_name   = "my-wan-ipconfig-primary"
+  wan_nic_secondary_ipconfig_name = "my-wan-ipconfig-secondary"
+ # └──────────────────────────────────────────────────────┘
+
+ # ┌───── Required Networkign Configuration ──────────────┐ 
   vnet_prefix           = "10.113.0.0/16"
   subnet_range_wan      = "10.113.2.0/24"
   subnet_range_lan      = "10.113.3.128/25"
   lan_ip_primary        = "10.113.3.135"
   lan_ip_secondary      = "10.113.3.136"
   floating_ip           = "10.113.3.137"
-   # ┌───── Optional Availability configuration ─────┐
+ # └──────────────────────────────────────────────────────┘
+
+  # ┌───── Optional Availability configuration ─────┐
   vsocket_primary_zone   = "1"
-  vsocket_secondary_zone = "2"                         # You cannot use Zones and Availability sets
+  vsocket_secondary_zone = "2" # You cannot use Zones and Availability sets
   availability_set_id    = null
   # └────────────────────────────────────────────────┘
-   
+
   enable_static_range_translation = false #set to true if the Account settings has been updated.
   routed_networks = {
-    "Peered-VNET-1" = {
-      subnet = "10.100.1.0/24"
-      # interface_index is omitted, so it will default to "LAN1".
-    }
-    "On-Prem-Network-With-NAT" = {
-      subnet            = "192.168.51.0/24"
-      translated_subnet = "10.250.3.0/24" # Example translated range, SRT Required, set 
-      interface_index = "LAN2" # Overriding the default value.
-      gateway = "192.168.51.254" # Overriding the default value of LAN1 LocalIP
-    }
+    # "Peered-VNET-1" = {
+    #   subnet = "10.100.1.0/24"
+    # }
+    # "Peered-VNET-2" = {
+    #   subnet            = "10.100.2.0/24"
+    # }
   }
 
   upstream_bandwidth   = 1000
   downstream_bandwidth = 1000
-  site_name             = "Your Site name here"
-  site_description      = "Your description here"
+  site_name            = "my-test-site"
+  site_description     = "my-test-desc"
+
+
   # Site location is Derived from Azure Region Location
   tags = {
     example_key = "example_value"
-    terraform = "true"
-    git_repo = "https://github.com/catonetworks/terraform-cato-vsocket-azure-ha-vnet-2nic"
+    terraform   = "true"
+    git_repo    = "https://github.com/catonetworks/terraform-cato-vsocket-azure-ha-vnet-2nic"
   }
 }
 ```

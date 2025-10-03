@@ -1,3 +1,25 @@
 # This template contains the command to restart the primary VM.
 
-az vm restart --resource-group "${resource_group_name}" --name "${vsocket_primary_name}"
+# Enable debug output
+set -x
+echo "Restarting primary vSocket..."
+echo "Resource Group: ${resource_group_name}"
+echo "Primary vSocket Name: ${vsocket_primary_name}"
+
+# Execute the restart command with output capture
+echo "Executing Azure CLI restart command..."
+output=$(az vm restart --resource-group "${resource_group_name}" --name "${vsocket_primary_name}" 2>&1)
+
+# Check the exit status
+exit_code=$?
+echo "Azure CLI exit code: $exit_code"
+echo "Azure CLI output:"
+echo "$output"
+
+if [ $exit_code -eq 0 ]; then
+    echo "SUCCESS: Primary vSocket restart completed successfully"
+    exit 0
+else
+    echo "ERROR: Primary vSocket restart failed"
+    exit $exit_code
+fi

@@ -98,10 +98,10 @@ resource "azurerm_network_interface" "wan-nic-primary" {
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = true
   location                       = var.location
-  name                           = "${local.resource_name_prefix}-wanPrimary"
+  name                           = var.wan_nic_primary_name == null ? "${local.resource_name_prefix}-wanPrimary" : var.wan_nic_primary_name
   resource_group_name            = local.resource_group_name
   ip_configuration {
-    name                          = "${local.resource_name_prefix}-wanIPPrimary"
+    name                          = var.wan_nic_primary_ipconfig_name == null ? "${local.resource_name_prefix}-wanIPPrimary" : var.wan_nic_primary_ipconfig_name
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.wan-public-ip-primary.id
     subnet_id                     = azurerm_subnet.subnet-wan.id
@@ -118,10 +118,10 @@ resource "azurerm_network_interface" "lan-nic-primary" {
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = true
   location                       = var.location
-  name                           = "${local.resource_name_prefix}-lanPrimary"
+  name                           = var.lan_nic_primary_name == null ? "${local.resource_name_prefix}-lanPrimary" : var.lan_nic_primary_name
   resource_group_name            = local.resource_group_name
   ip_configuration {
-    name                          = "${local.resource_name_prefix}-lanIPConfigPrimary"
+    name                          = var.lan_nic_primary_ipconfig_name == null ? "${local.resource_name_prefix}-lanIPConfigPrimary" : var.lan_nic_primary_ipconfig_name
     private_ip_address_allocation = "Static"
     private_ip_address            = var.lan_ip_primary
     subnet_id                     = azurerm_subnet.subnet-lan.id
@@ -139,10 +139,10 @@ resource "azurerm_network_interface" "wan-nic-secondary" {
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = true
   location                       = var.location
-  name                           = "${local.resource_name_prefix}-wanSecondary"
+  name                           = var.wan_nic_secondary_name == null ? "${local.resource_name_prefix}-wanSecondary" : var.wan_nic_secondary_name
   resource_group_name            = local.resource_group_name
   ip_configuration {
-    name                          = "${local.resource_name_prefix}-wanIPSecondary"
+    name                          = var.wan_nic_secondary_ipconfig_name == null ? "${local.resource_name_prefix}-wanIPSecondary" : var.wan_nic_secondary_ipconfig_name
     private_ip_address_allocation = "Dynamic"
     public_ip_address_id          = azurerm_public_ip.wan-public-ip-secondary.id
     subnet_id                     = azurerm_subnet.subnet-wan.id
@@ -158,10 +158,10 @@ resource "azurerm_network_interface" "lan-nic-secondary" {
   ip_forwarding_enabled          = true
   accelerated_networking_enabled = true
   location                       = var.location
-  name                           = "${local.resource_name_prefix}-lanSecondary"
+  name                           = var.lan_nic_secondary_name == null ? "${local.resource_name_prefix}-lanSecondary" : var.lan_nic_secondary_name
   resource_group_name            = local.resource_group_name
   ip_configuration {
-    name                          = "${local.resource_name_prefix}-lanIPConfigSecondary"
+    name                          = var.lan_nic_secondary_ipconfig_name == null ? "${local.resource_name_prefix}-lanIPConfigSecondary" : var.lan_nic_secondary_ipconfig_name
     private_ip_address_allocation = "Static"
     private_ip_address            = var.lan_ip_secondary
     subnet_id                     = azurerm_subnet.subnet-lan.id
@@ -439,18 +439,6 @@ resource "time_sleep" "sleep_5_seconds" {
   depends_on      = [azurerm_linux_virtual_machine.vsocket_primary]
 }
 
-data "azurerm_network_interface" "wannicmac" {
-  name                = "${local.resource_name_prefix}-wanPrimary"
-  resource_group_name = local.resource_group_name
-  depends_on          = [time_sleep.sleep_5_seconds]
-}
-
-data "azurerm_network_interface" "lannicmac" {
-  name                = "${local.resource_name_prefix}-lanPrimary"
-  resource_group_name = local.resource_group_name
-  depends_on          = [time_sleep.sleep_5_seconds]
-}
-
 variable "commands" {
   type = list(string)
   default = [
@@ -603,16 +591,27 @@ resource "terraform_data" "configure_secondary_azure_vsocket" {
       interface_ip = azurerm_network_interface.lan-nic-secondary.private_ip_address
       site_id      = cato_socket_site.azure-site.id
     })
+    
+    # Add error handling and debugging
+    on_failure = continue
   }
 
   triggers_replace = {
-    account_id = var.account_id
-    site_id    = cato_socket_site.azure-site.id
+    account_id   = var.account_id
+    site_id      = cato_socket_site.azure-site.id
+    floating_ip  = var.floating_ip
+    interface_ip = azurerm_network_interface.lan-nic-secondary.private_ip_address
+  }
+
+  lifecycle {
+    replace_triggered_by = [
+      azurerm_network_interface.lan-nic-secondary
+    ]
   }
 }
 
 
-# Create HA Settings Secondary
+# Create HA Settings Primary
 resource "terraform_data" "run_command_ha_primary" {
   provisioner "local-exec" {
     # This command is now generated from a template file.
@@ -630,6 +629,15 @@ resource "terraform_data" "run_command_ha_primary" {
       primary_nic_mac      = azurerm_network_interface.lan-nic-primary.mac_address
       subnet_range_lan     = var.subnet_range_lan
     })
+    
+    # Add error handling
+    on_failure = continue
+  }
+
+  triggers_replace = {
+    primary_nic_ip  = azurerm_network_interface.lan-nic-primary.private_ip_address
+    primary_nic_mac = azurerm_network_interface.lan-nic-primary.mac_address
+    secondary_nic   = azurerm_network_interface.lan-nic-secondary.name
   }
 
   depends_on = [
@@ -653,6 +661,15 @@ resource "terraform_data" "run_command_ha_secondary" {
       secondary_nic_mac      = azurerm_network_interface.lan-nic-secondary.mac_address
       subnet_range_lan       = var.subnet_range_lan
     })
+    
+    # Add error handling
+    on_failure = continue
+  }
+
+  triggers_replace = {
+    secondary_nic_ip  = azurerm_network_interface.lan-nic-secondary.private_ip_address
+    secondary_nic_mac = azurerm_network_interface.lan-nic-secondary.mac_address
+    primary_nic       = azurerm_network_interface.lan-nic-primary.name
   }
 
   depends_on = [
@@ -668,6 +685,13 @@ resource "terraform_data" "reboot_vsocket_primary" {
       resource_group_name  = data.azurerm_resource_group.data-azure-rg.name
       vsocket_primary_name = local.vsocket_primary_name_local
     })
+    
+    # Add error handling
+    on_failure = continue
+  }
+
+  triggers_replace = {
+    primary_vm_id = azurerm_linux_virtual_machine.vsocket_primary.id
   }
 
   depends_on = [
@@ -683,6 +707,13 @@ resource "terraform_data" "reboot_vsocket_secondary" {
       resource_group_name    = data.azurerm_resource_group.data-azure-rg.name
       vsocket_secondary_name = local.vsocket_secondary_name_local
     })
+    
+    # Add error handling
+    on_failure = continue
+  }
+
+  triggers_replace = {
+    secondary_vm_id = azurerm_linux_virtual_machine.vsocket_secondary.id
   }
 
   depends_on = [

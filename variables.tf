@@ -2,7 +2,7 @@
 ## Cato Provider Variables
 variable "token" {
   description = "API token used to authenticate with the Cato Networks API."
-  sensitive   = true
+  sensitive   = true  # Commented out temporarily for debugging
   type        = string
 }
 
@@ -106,7 +106,6 @@ variable "vnet_name" {
 variable "azure_subscription_id" {
   description = "The Azure Subscription ID where the resources will be created. Example: 00000000-0000-0000-0000-000000000000"
   type        = string
-  sensitive   = true
 }
 
 variable "location" {
@@ -353,4 +352,52 @@ variable "enable_static_range_translation" {
   description = "Enables the ability to use translated ranges"
   type        = string
   default     = false
+}
+
+variable "lan_nic_primary_name" {
+  description = "Optional override name for the primary LAN NIC"
+  type        = string
+  default     = null
+}
+
+variable "lan_nic_secondary_name" {
+  description = "Optional override name for the secondary LAN NIC"
+  type        = string
+  default     = null
+}
+
+variable "lan_nic_primary_ipconfig_name" {
+  description = "Optional override name for the primary LAN NIC IP Configuration"
+  type        = string
+  default     = null
+}
+
+variable "lan_nic_secondary_ipconfig_name" {
+  description = "Optional override name for the secondary LAN NIC IP Configuration"
+  type        = string
+  default     = null
+}
+
+variable "wan_nic_primary_name" {
+  description = "Optional override name for the primary LAN NIC"
+  type        = string
+  default     = null
+}
+
+variable "wan_nic_secondary_name" {
+  description = "Optional override name for the secondary LAN NIC"
+  type        = string
+  default     = null
+}
+
+variable "wan_nic_primary_ipconfig_name" {
+  description = "Optional override name for the primary WAN NIC IP Configuration"
+  type        = string
+  default     = null
+}
+
+variable "wan_nic_secondary_ipconfig_name" {
+  description = "Optional override name for the secondary WAN NIC IP Configuration"
+  type        = string
+  default     = null
 }

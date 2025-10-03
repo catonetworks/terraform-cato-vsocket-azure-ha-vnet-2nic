@@ -15,15 +15,27 @@ data "cato_accountSnapshotSite" "azure-site-secondary" {
 }
 
 data "azurerm_network_interface" "wannicmac-2" {
-  name                = "${local.resource_name_prefix}-wanSecondary"
+  name                = var.wan_nic_secondary_name == null ? "${local.resource_name_prefix}-wanSecondary" : var.wan_nic_secondary_name
   resource_group_name = local.resource_group_name
   depends_on          = [time_sleep.sleep_5_seconds-2]
 }
 
 data "azurerm_network_interface" "lannicmac-2" {
-  name                = "${local.resource_name_prefix}-lanSecondary"
+  name                = var.lan_nic_secondary_name == null ? "${local.resource_name_prefix}-lanSecondary" : var.lan_nic_secondary_name
   resource_group_name = local.resource_group_name
   depends_on          = [time_sleep.sleep_5_seconds-2]
+}
+
+data "azurerm_network_interface" "wannicmac" {
+  name                = var.wan_nic_primary_name == null ? "${local.resource_name_prefix}-wanPrimary" : var.wan_nic_primary_name
+  resource_group_name = local.resource_group_name
+  depends_on          = [time_sleep.sleep_5_seconds]
+}
+
+data "azurerm_network_interface" "lannicmac" {
+  name                = var.lan_nic_primary_name == null ? "${local.resource_name_prefix}-lanPrimary" : var.lan_nic_primary_name
+  resource_group_name = local.resource_group_name
+  depends_on          = [time_sleep.sleep_5_seconds]
 }
 
 data "cato_accountSnapshotSite" "azure-site-2" {

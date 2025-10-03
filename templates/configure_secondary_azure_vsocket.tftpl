@@ -2,6 +2,17 @@
 # It makes a POST request with a GraphQL mutation payload.
 # The values are dynamically inserted by Terraform during the apply phase.
 
+# Enable debug output
+set -x
+echo "Starting secondary Azure vSocket configuration..."
+echo "Site ID: ${site_id}"
+echo "Account ID: ${account_id}"
+echo "Floating IP: ${floating_ip}"
+echo "Interface IP: ${interface_ip}"
+echo "Base URL: ${base_url}"
+
+# Make the API call with detailed output
+echo "Making API call to configure secondary vSocket..."
 response=$(curl -k -X POST \
   -H "Accept: application/json" \
   -H "Content-Type: application/json" \
@@ -22,3 +33,27 @@ response=$(curl -k -X POST \
     },
     "operationName": "siteAddSecondaryAzureVSocket"
   }' )
+
+# Check the curl exit status
+curl_exit_code=$?
+echo "Curl exit code: $curl_exit_code"
+
+# Output the response
+echo "API Response:"
+echo "$response"
+
+# Check if response contains errors
+if echo "$response" | grep -q '"errors"'; then
+    echo "ERROR: API returned errors in response"
+    echo "$response" | grep -o '"errors":[^}]*}'
+    exit 1
+fi
+
+# Check for successful response
+if echo "$response" | grep -q '"id"'; then
+    echo "SUCCESS: Secondary vSocket configured successfully"
+    exit 0
+else
+    echo "ERROR: Unexpected response format or missing ID in response"
+    exit 1
+fi
