@@ -132,7 +132,7 @@ resource "azurerm_network_interface" "lan-nic-primary" {
   lifecycle {
     ignore_changes = [ip_configuration] #Ignoring Changes because the Floating IP will move based on Active Device
   }
-  tags = var.tags
+  # Tags removed as change of Floating IP causes clearing of tags and drift
 }
 
 resource "azurerm_network_interface" "wan-nic-secondary" {
@@ -173,7 +173,7 @@ resource "azurerm_network_interface" "lan-nic-secondary" {
   lifecycle {
     ignore_changes = [ip_configuration] #Ignoring Changes because the Floating IP will move based on Active Device
   }
-  tags = var.tags
+  # Tags removed as change of Floating IP causes clearing of tags and drift
 }
 
 resource "azurerm_subnet_network_security_group_association" "wan-association" {
@@ -455,21 +455,14 @@ resource "azurerm_virtual_machine_extension" "vsocket-custom-script-primary" {
   type                       = "CustomScript"
   type_handler_version       = "2.1"
   virtual_machine_id         = azurerm_linux_virtual_machine.vsocket_primary.id
+
   lifecycle {
     ignore_changes = all
   }
-  settings = <<SETTINGS
-{
-  "commandToExecute": "echo '${local.primary_serial[0]}' > /cato/serial.txt; echo '{\"wan_nic\":\"${azurerm_network_interface.wan-nic-primary.name}\",\"wan_nic_mac\":\"${lower(replace(data.azurerm_network_interface.wannicmac.mac_address, "-", ":"))}\",\"wan_nic_ip\":\"${azurerm_network_interface.wan-nic-primary.private_ip_address}\",\"lan_nic\":\"${azurerm_network_interface.lan-nic-primary.name}\",\"lan_nic_mac\":\"${lower(replace(data.azurerm_network_interface.lannicmac.mac_address, "-", ":"))}\",\"lan_nic_ip\":\"${azurerm_network_interface.lan-nic-primary.private_ip_address}\"}' > /cato/nics_config.json; ${join(";", var.commands)}"
-}
-SETTINGS
 
-  depends_on = [
-    azurerm_linux_virtual_machine.vsocket_primary,
-    data.azurerm_network_interface.lannicmac,
-    data.azurerm_network_interface.wannicmac
-  ]
-  tags = var.tags
+  settings = jsonencode({
+    commandToExecute = local.primary_command
+  })
 }
 
 # To allow socket to upgrade, so secondary socket can be added
@@ -548,7 +541,6 @@ resource "azurerm_linux_virtual_machine" "vsocket_secondary" {
   tags = var.tags
 }
 
-
 #Sleep to allow Secondary vSocket interface mac address retrieval
 resource "time_sleep" "sleep_5_seconds-2" {
   create_duration = "5s"
@@ -562,18 +554,14 @@ resource "azurerm_virtual_machine_extension" "vsocket-custom-script-secondary" {
   type                       = "CustomScript"
   type_handler_version       = "2.1"
   virtual_machine_id         = azurerm_linux_virtual_machine.vsocket_secondary.id
+
   lifecycle {
     ignore_changes = all
   }
-  settings = <<SETTINGS
- {
-  "commandToExecute": "echo '${local.secondary_serial[0]}' > /cato/serial.txt; echo '{\"wan_nic\":\"${azurerm_network_interface.wan-nic-secondary.name}\",\"wan_nic_mac\":\"${lower(replace(data.azurerm_network_interface.wannicmac-2.mac_address, "-", ":"))}\",\"wan_nic_ip\":\"${azurerm_network_interface.wan-nic-secondary.private_ip_address}\",\"lan_nic\":\"${azurerm_network_interface.lan-nic-secondary.name}\",\"lan_nic_mac\":\"${lower(replace(data.azurerm_network_interface.lannicmac-2.mac_address, "-", ":"))}\",\"lan_nic_ip\":\"${azurerm_network_interface.lan-nic-secondary.private_ip_address}\"}' > /cato/nics_config.json; ${join(";", var.commands)}"
- }
-SETTINGS
-  depends_on = [
-    azurerm_linux_virtual_machine.vsocket_secondary
-  ]
-  tags = var.tags
+
+  settings = jsonencode({
+    commandToExecute = local.secondary_command
+  })
 }
 
 # Configure Secondary Azure vSocket via API
@@ -610,117 +598,6 @@ resource "terraform_data" "configure_secondary_azure_vsocket" {
   }
 }
 
-
-# Create HA Settings Primary
-resource "terraform_data" "run_command_ha_primary" {
-  provisioner "local-exec" {
-    # This command is now generated from a template file.
-    # The templatefile() function reads the template and injects the variables.
-    command = templatefile("${path.module}/templates/run_command_ha_primary.tftpl", {
-      resource_group_name  = data.azurerm_resource_group.data-azure-rg.name
-      vsocket_primary_name = local.vsocket_primary_name_local
-      location             = var.location
-      subscription_id      = var.azure_subscription_id
-      vnet_name            = var.vnet_name
-      subnet_name          = azurerm_subnet.subnet-lan.name
-      primary_nic_name     = azurerm_network_interface.lan-nic-primary.name
-      secondary_nic_name   = azurerm_network_interface.lan-nic-secondary.name
-      primary_nic_ip       = azurerm_network_interface.lan-nic-primary.private_ip_address
-      primary_nic_mac      = azurerm_network_interface.lan-nic-primary.mac_address
-      subnet_range_lan     = var.subnet_range_lan
-    })
-    
-    # Add error handling
-    on_failure = continue
-  }
-
-  triggers_replace = {
-    primary_nic_ip  = azurerm_network_interface.lan-nic-primary.private_ip_address
-    primary_nic_mac = azurerm_network_interface.lan-nic-primary.mac_address
-    secondary_nic   = azurerm_network_interface.lan-nic-secondary.name
-  }
-
-  depends_on = [
-    azurerm_virtual_machine_extension.vsocket-custom-script-secondary
-  ]
-}
-
-resource "terraform_data" "run_command_ha_secondary" {
-  provisioner "local-exec" {
-    # This command is also generated from its own template file.
-    command = templatefile("${path.module}/templates/run_command_ha_secondary.tftpl", {
-      resource_group_name    = data.azurerm_resource_group.data-azure-rg.name
-      vsocket_secondary_name = local.vsocket_secondary_name_local
-      location               = var.location
-      subscription_id        = var.azure_subscription_id
-      vnet_name              = var.vnet_name
-      subnet_name            = azurerm_subnet.subnet-lan.name
-      primary_nic_name       = azurerm_network_interface.lan-nic-primary.name
-      secondary_nic_name     = azurerm_network_interface.lan-nic-secondary.name
-      secondary_nic_ip       = azurerm_network_interface.lan-nic-secondary.private_ip_address
-      secondary_nic_mac      = azurerm_network_interface.lan-nic-secondary.mac_address
-      subnet_range_lan       = var.subnet_range_lan
-    })
-    
-    # Add error handling
-    on_failure = continue
-  }
-
-  triggers_replace = {
-    secondary_nic_ip  = azurerm_network_interface.lan-nic-secondary.private_ip_address
-    secondary_nic_mac = azurerm_network_interface.lan-nic-secondary.mac_address
-    primary_nic       = azurerm_network_interface.lan-nic-primary.name
-  }
-
-  depends_on = [
-    azurerm_virtual_machine_extension.vsocket-custom-script-secondary
-  ]
-}
-
-# Reboot Primary vSocket
-resource "terraform_data" "reboot_vsocket_primary" {
-  provisioner "local-exec" {
-    # The simple restart command is also templated for consistency.
-    command = templatefile("${path.module}/templates/reboot_vsocket_primary.tftpl", {
-      resource_group_name  = data.azurerm_resource_group.data-azure-rg.name
-      vsocket_primary_name = local.vsocket_primary_name_local
-    })
-    
-    # Add error handling
-    on_failure = continue
-  }
-
-  triggers_replace = {
-    primary_vm_id = azurerm_linux_virtual_machine.vsocket_primary.id
-  }
-
-  depends_on = [
-    terraform_data.run_command_ha_secondary
-  ]
-}
-
-# Reboot Secondary vSocket
-resource "terraform_data" "reboot_vsocket_secondary" {
-  provisioner "local-exec" {
-    # Templating the secondary restart command.
-    command = templatefile("${path.module}/templates/reboot_vsocket_secondary.tftpl", {
-      resource_group_name    = data.azurerm_resource_group.data-azure-rg.name
-      vsocket_secondary_name = local.vsocket_secondary_name_local
-    })
-    
-    # Add error handling
-    on_failure = continue
-  }
-
-  triggers_replace = {
-    secondary_vm_id = azurerm_linux_virtual_machine.vsocket_secondary.id
-  }
-
-  depends_on = [
-    terraform_data.run_command_ha_secondary
-  ]
-}
-
 # Role assignments for secondary lan nic and subnet
 resource "azurerm_role_assignment" "secondary_nic_ha_role" {
   principal_id         = azurerm_user_assigned_identity.CatoHaIdentity.principal_id
@@ -742,18 +619,6 @@ resource "azurerm_role_assignment" "primary_nic_ha_role" {
   role_definition_name = "Virtual Machine Contributor"
   scope                = "/subscriptions/${var.azure_subscription_id}/resourcegroups/${data.azurerm_resource_group.data-azure-rg.name}/providers/Microsoft.Network/networkInterfaces/${azurerm_network_interface.lan-nic-primary.name}"
   depends_on           = [azurerm_user_assigned_identity.CatoHaIdentity]
-}
-
-# Time delay to allow for vsockets to upgrade
-resource "time_sleep" "delay" {
-  create_duration = "10s"
-  depends_on      = [terraform_data.run_command_ha_secondary]
-}
-
-# Time delay to allow for vsockets HA to complete configuration
-resource "time_sleep" "delay-ha" {
-  create_duration = "75s"
-  depends_on      = [terraform_data.reboot_vsocket_secondary]
 }
 
 # Allow vSocket to be disconnected to delete site
@@ -787,7 +652,7 @@ resource "cato_wan_interface" "wan" {
 
 # Cato license resource
 resource "cato_license" "license" {
-  depends_on = [terraform_data.reboot_vsocket_secondary]
+  depends_on = [azurerm_virtual_machine_extension.vsocket-custom-script-secondary]
   count      = var.license_id == null ? 0 : 1
   site_id    = cato_socket_site.azure-site.id
   license_id = var.license_id
