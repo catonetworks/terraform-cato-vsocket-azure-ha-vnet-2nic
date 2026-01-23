@@ -123,3 +123,11 @@
   - Updated CLI Calls to export additional debug information
   - Updated Required Terraform Version to 1.5
   - Removed Sensitive flag for Azure Subscription ID
+
+ ## 0.1.8
+
+ ### Features
+  - Refactored module to work with HCP Cloud deployment which does not natively have AZ CLI.
+    - Combined Custom script resources with HA settings resources for Primary and Secondary
+    - Removed AZ CLI reboot of vSockets
+  - Removed depends_on for license module to apply license to Cato site as soon as it is provisioned

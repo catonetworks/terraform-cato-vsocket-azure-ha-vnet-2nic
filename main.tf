@@ -652,7 +652,6 @@ resource "cato_wan_interface" "wan" {
 
 # Cato license resource
 resource "cato_license" "license" {
-  depends_on = [azurerm_virtual_machine_extension.vsocket-custom-script-secondary]
   count      = var.license_id == null ? 0 : 1
   site_id    = cato_socket_site.azure-site.id
   license_id = var.license_id
