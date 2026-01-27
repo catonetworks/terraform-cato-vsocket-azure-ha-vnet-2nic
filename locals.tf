@@ -38,7 +38,7 @@ locals {
     nic             = azurerm_network_interface.lan-nic-primary.name
     ha_nic          = azurerm_network_interface.lan-nic-secondary.name
     lan_nic_ip      = azurerm_network_interface.lan-nic-primary.private_ip_address
-    lan_nic_mac     = azurerm_network_interface.lan-nic-primary.mac_address
+    lan_nic_mac     = lower(replace(data.azurerm_network_interface.lannicmac.mac_address, "-", ":"))
     subnet_cidr     = var.subnet_range_lan
     az_mgmt_url     = "management.azure.com"
   })
@@ -79,7 +79,7 @@ locals {
     nic             = azurerm_network_interface.lan-nic-secondary.name
     ha_nic          = azurerm_network_interface.lan-nic-primary.name
     lan_nic_ip      = azurerm_network_interface.lan-nic-secondary.private_ip_address
-    lan_nic_mac     = azurerm_network_interface.lan-nic-secondary.mac_address
+    lan_nic_mac     = lower(replace(data.azurerm_network_interface.lannicmac-2.mac_address, "-", ":"))
     subnet_cidr     = var.subnet_range_lan
     az_mgmt_url     = "management.azure.com"
   })
