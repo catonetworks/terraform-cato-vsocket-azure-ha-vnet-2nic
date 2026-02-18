@@ -131,3 +131,4 @@
     - Combined Custom script resources with HA settings resources for Primary and Secondary
     - Removed AZ CLI reboot of vSockets
   - Removed depends_on for license module to apply license to Cato site as soon as it is provisioned
+  - Reverted to provider version 0.0.57 to address local_ip and gateway api param issue in state
