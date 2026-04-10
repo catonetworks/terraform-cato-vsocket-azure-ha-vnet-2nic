@@ -132,3 +132,7 @@
     - Removed AZ CLI reboot of vSockets
   - Removed depends_on for license module to apply license to Cato site as soon as it is provisioned
   - Reverted to provider version 0.0.57 to address local_ip and gateway api param issue in state
+
+## 0.1.9 (2026-04-10)
+### Features
+- Updated version of provider adding in lastest SDK with updated ENUM values for accounSnapshot and license

@@ -17,6 +17,19 @@ Cato recommends setting the value to 1. Example call: terraform apply -paralleli
 ## Usage
 
 ```hcl
+terraform {
+  required_providers {
+    cato = {
+      source = "catonetworks/cato"
+      version = "0.0.57-1"
+    }
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.33"
+    }
+  }
+}
+
 provider "azurerm" {
   subscription_id = var.azure_subscription_id
   features {}
