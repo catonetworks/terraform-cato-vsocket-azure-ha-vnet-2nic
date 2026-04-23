@@ -134,8 +134,8 @@ For more information on site_location syntax, use the [Cato CLI](https://github.
 
 ```bash
 $ pip3 install catocli
-$ export CATO_TOKEN="your-api-token-here"
-$ export CATO_ACCOUNT_ID="your-account-id"
+$ export TF_VAR_CATO_TOKEN="your-api-token-here"
+$ export TF_VAR_CATO_ACCOUNT_ID="your-account-id"
 $ catocli query siteLocation -h
 $ catocli query siteLocation '{"filters":[{"search": "San Diego","field":"city","operation":"exact"}]}' -p
 ```
@@ -153,17 +153,17 @@ Apache 2 Licensed. See [LICENSE](https://github.com/catonetworks/terraform-cato-
 ## Requirements
 
 | Name | Version |
-|------|---------|
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.4 |
+| ---- | ------- |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | >= 4.33.0 |
-| <a name="requirement_cato"></a> [cato](#requirement\_cato) | >= 0.0.38 |
+| <a name="requirement_cato"></a> [cato](#requirement\_cato) | 0.0.57-1 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | >= 4.33.0 |
-| <a name="provider_cato"></a> [cato](#provider\_cato) | >= 0.0.38 |
+| <a name="provider_cato"></a> [cato](#provider\_cato) | 0.0.57-1 |
 | <a name="provider_random"></a> [random](#provider\_random) | n/a |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 | <a name="provider_time"></a> [time](#provider\_time) | n/a |
@@ -175,7 +175,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [azurerm_availability_set.availability-set](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/availability_set) | resource |
 | [azurerm_linux_virtual_machine.vsocket_primary](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine) | resource |
 | [azurerm_linux_virtual_machine.vsocket_secondary](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/linux_virtual_machine) | resource |
@@ -207,19 +207,13 @@ No modules.
 | [azurerm_virtual_machine_extension.vsocket-custom-script-secondary](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_machine_extension) | resource |
 | [azurerm_virtual_network.vnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network) | resource |
 | [azurerm_virtual_network_dns_servers.dns_servers](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network_dns_servers) | resource |
-| [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/license) | resource |
-| [cato_network_range.routedAzure](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/network_range) | resource |
-| [cato_socket_site.azure-site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/socket_site) | resource |
-| [cato_wan_interface.wan](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/resources/wan_interface) | resource |
+| [cato_license.license](https://registry.terraform.io/providers/catonetworks/cato/0.0.57-1/docs/resources/license) | resource |
+| [cato_network_range.routedAzure](https://registry.terraform.io/providers/catonetworks/cato/0.0.57-1/docs/resources/network_range) | resource |
+| [cato_socket_site.azure-site](https://registry.terraform.io/providers/catonetworks/cato/0.0.57-1/docs/resources/socket_site) | resource |
+| [cato_wan_interface.wan](https://registry.terraform.io/providers/catonetworks/cato/0.0.57-1/docs/resources/wan_interface) | resource |
 | [random_string.vsocket-random-password](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [random_string.vsocket-random-username](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/string) | resource |
 | [terraform_data.configure_secondary_azure_vsocket](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [terraform_data.reboot_vsocket_primary](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [terraform_data.reboot_vsocket_secondary](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [terraform_data.run_command_ha_primary](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [terraform_data.run_command_ha_secondary](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
-| [time_sleep.delay](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
-| [time_sleep.delay-ha](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_sleep.sleep_300_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_sleep.sleep_30_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
 | [time_sleep.sleep_5_seconds](https://registry.terraform.io/providers/hashicorp/time/latest/docs/resources/sleep) | resource |
@@ -231,15 +225,15 @@ No modules.
 | [azurerm_network_interface.wannicmac-2](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/network_interface) | data source |
 | [azurerm_resource_group.data-azure-rg](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) | data source |
 | [azurerm_virtual_network.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/virtual_network) | data source |
-| [cato_accountSnapshotSite.azure-site](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
-| [cato_accountSnapshotSite.azure-site-2](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
-| [cato_accountSnapshotSite.azure-site-secondary](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/accountSnapshotSite) | data source |
-| [cato_siteLocation.site_location](https://registry.terraform.io/providers/catonetworks/cato/latest/docs/data-sources/siteLocation) | data source |
+| [cato_accountSnapshotSite.azure-site](https://registry.terraform.io/providers/catonetworks/cato/0.0.57-1/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_accountSnapshotSite.azure-site-2](https://registry.terraform.io/providers/catonetworks/cato/0.0.57-1/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_accountSnapshotSite.azure-site-secondary](https://registry.terraform.io/providers/catonetworks/cato/0.0.57-1/docs/data-sources/accountSnapshotSite) | data source |
+| [cato_siteLocation.site_location](https://registry.terraform.io/providers/catonetworks/cato/0.0.57-1/docs/data-sources/siteLocation) | data source |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_account_id"></a> [account\_id](#input\_account\_id) | Account ID used for the Cato Networks integration. | `number` | `null` | no |
 | <a name="input_availability_set_id"></a> [availability\_set\_id](#input\_availability\_set\_id) | Availability set ID | `string` | `null` | no |
 | <a name="input_azure_subscription_id"></a> [azure\_subscription\_id](#input\_azure\_subscription\_id) | The Azure Subscription ID where the resources will be created. Example: 00000000-0000-0000-0000-000000000000 | `string` | n/a | yes |
@@ -255,6 +249,10 @@ No modules.
 | <a name="input_ha_identity_name"></a> [ha\_identity\_name](#input\_ha\_identity\_name) | Optional override name for the Cato HA Identity | `string` | `null` | no |
 | <a name="input_lan_ip_primary"></a> [lan\_ip\_primary](#input\_lan\_ip\_primary) | Local IP Address of socket LAN interface | `string` | `null` | no |
 | <a name="input_lan_ip_secondary"></a> [lan\_ip\_secondary](#input\_lan\_ip\_secondary) | Local IP Address of socket LAN interface | `string` | `null` | no |
+| <a name="input_lan_nic_primary_ipconfig_name"></a> [lan\_nic\_primary\_ipconfig\_name](#input\_lan\_nic\_primary\_ipconfig\_name) | Optional override name for the primary LAN NIC IP Configuration | `string` | `null` | no |
+| <a name="input_lan_nic_primary_name"></a> [lan\_nic\_primary\_name](#input\_lan\_nic\_primary\_name) | Optional override name for the primary LAN NIC | `string` | `null` | no |
+| <a name="input_lan_nic_secondary_ipconfig_name"></a> [lan\_nic\_secondary\_ipconfig\_name](#input\_lan\_nic\_secondary\_ipconfig\_name) | Optional override name for the secondary LAN NIC IP Configuration | `string` | `null` | no |
+| <a name="input_lan_nic_secondary_name"></a> [lan\_nic\_secondary\_name](#input\_lan\_nic\_secondary\_name) | Optional override name for the secondary LAN NIC | `string` | `null` | no |
 | <a name="input_lan_subnet_name"></a> [lan\_subnet\_name](#input\_lan\_subnet\_name) | Optional override name for the LAN subnet | `string` | `null` | no |
 | <a name="input_license_bw"></a> [license\_bw](#input\_license\_bw) | The license bandwidth number for the cato site, specifying bandwidth ONLY applies for pooled licenses.  For a standard site license that is not pooled, leave this value null. Must be a number greater than 0 and an increment of 10. | `string` | `null` | no |
 | <a name="input_license_id"></a> [license\_id](#input\_license\_id) | The license ID for the Cato vSocket of license type CATO\_SITE, CATO\_SSE\_SITE, CATO\_PB, CATO\_PB\_SSE.  Example License ID value: 'abcde123-abcd-1234-abcd-abcde1234567'.  Note that licenses are for commercial accounts, and not supported for trial accounts. | `string` | `null` | no |
@@ -283,12 +281,16 @@ No modules.
 | <a name="input_vsocket_secondary_disk_name"></a> [vsocket\_secondary\_disk\_name](#input\_vsocket\_secondary\_disk\_name) | Optional override name for the secondary vSocket Disk | `string` | `null` | no |
 | <a name="input_vsocket_secondary_name"></a> [vsocket\_secondary\_name](#input\_vsocket\_secondary\_name) | Optional override name for the secondary vSocket | `string` | `null` | no |
 | <a name="input_vsocket_secondary_zone"></a> [vsocket\_secondary\_zone](#input\_vsocket\_secondary\_zone) | Secondary vsocket Availability Zone | `string` | `null` | no |
+| <a name="input_wan_nic_primary_ipconfig_name"></a> [wan\_nic\_primary\_ipconfig\_name](#input\_wan\_nic\_primary\_ipconfig\_name) | Optional override name for the primary WAN NIC IP Configuration | `string` | `null` | no |
+| <a name="input_wan_nic_primary_name"></a> [wan\_nic\_primary\_name](#input\_wan\_nic\_primary\_name) | Optional override name for the primary LAN NIC | `string` | `null` | no |
+| <a name="input_wan_nic_secondary_ipconfig_name"></a> [wan\_nic\_secondary\_ipconfig\_name](#input\_wan\_nic\_secondary\_ipconfig\_name) | Optional override name for the secondary WAN NIC IP Configuration | `string` | `null` | no |
+| <a name="input_wan_nic_secondary_name"></a> [wan\_nic\_secondary\_name](#input\_wan\_nic\_secondary\_name) | Optional override name for the secondary LAN NIC | `string` | `null` | no |
 | <a name="input_wan_subnet_name"></a> [wan\_subnet\_name](#input\_wan\_subnet\_name) | Optional override name for the WAN subnet | `string` | `null` | no |
 
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_cato_license_site"></a> [cato\_license\_site](#output\_cato\_license\_site) | n/a |
 | <a name="output_cato_primary_serial"></a> [cato\_primary\_serial](#output\_cato\_primary\_serial) | Primary Cato Socket Serial Number |
 | <a name="output_cato_secondary_serial"></a> [cato\_secondary\_serial](#output\_cato\_secondary\_serial) | Secondary Cato Socket Serial Number |
@@ -310,10 +312,8 @@ No modules.
 | <a name="output_primary_nic_role_assignment_id"></a> [primary\_nic\_role\_assignment\_id](#output\_primary\_nic\_role\_assignment\_id) | Role Assignment ID for the Primary NIC |
 | <a name="output_secondary_nic_role_assignment_id"></a> [secondary\_nic\_role\_assignment\_id](#output\_secondary\_nic\_role\_assignment\_id) | Role Assignment ID for the Secondary NIC |
 | <a name="output_site_location"></a> [site\_location](#output\_site\_location) | n/a |
-| <a name="output_vsocket_primary_reboot_status"></a> [vsocket\_primary\_reboot\_status](#output\_vsocket\_primary\_reboot\_status) | Status of the Primary vSocket VM Reboot |
 | <a name="output_vsocket_primary_vm_id"></a> [vsocket\_primary\_vm\_id](#output\_vsocket\_primary\_vm\_id) | ID of the Primary vSocket Virtual Machine |
 | <a name="output_vsocket_primary_vm_name"></a> [vsocket\_primary\_vm\_name](#output\_vsocket\_primary\_vm\_name) | Name of the Primary vSocket Virtual Machine |
-| <a name="output_vsocket_secondary_reboot_status"></a> [vsocket\_secondary\_reboot\_status](#output\_vsocket\_secondary\_reboot\_status) | Status of the Secondary vSocket VM Reboot |
 | <a name="output_vsocket_secondary_vm_id"></a> [vsocket\_secondary\_vm\_id](#output\_vsocket\_secondary\_vm\_id) | ID of the Secondary vSocket Virtual Machine |
 | <a name="output_vsocket_secondary_vm_name"></a> [vsocket\_secondary\_vm\_name](#output\_vsocket\_secondary\_vm\_name) | Name of the Secondary vSocket Virtual Machine |
 | <a name="output_wan_nic_name_primary"></a> [wan\_nic\_name\_primary](#output\_wan\_nic\_name\_primary) | The name of the primary WAN network interface. |
