@@ -579,7 +579,7 @@ resource "terraform_data" "configure_secondary_azure_vsocket" {
       interface_ip = azurerm_network_interface.lan-nic-secondary.private_ip_address
       site_id      = cato_socket_site.azure-site.id
     })
-    
+
     # Add error handling and debugging
     on_failure = continue
   }

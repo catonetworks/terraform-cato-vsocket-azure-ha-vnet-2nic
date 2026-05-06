@@ -2,7 +2,7 @@
 ## Cato Provider Variables
 variable "token" {
   description = "API token used to authenticate with the Cato Networks API."
-  sensitive   = true  # Commented out temporarily for debugging
+  sensitive   = true # Commented out temporarily for debugging
   type        = string
 }
 
