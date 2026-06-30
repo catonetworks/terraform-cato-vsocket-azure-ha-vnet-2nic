@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.11 (2026-06-30)
+
+### Changed
+- Updated Cato provider requirement to >= 0.0.88
+
 ## 0.1.10 (2026-05-06)
 
 ### Changed

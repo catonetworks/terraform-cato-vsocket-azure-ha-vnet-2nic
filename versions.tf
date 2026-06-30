@@ -2,7 +2,7 @@ terraform {
   required_providers {
     cato = {
       source  = "catonetworks/cato"
-      version = "0.0.57-1"
+      version = ">= 0.0.88"
     }
     azurerm = {
       source  = "hashicorp/azurerm"
